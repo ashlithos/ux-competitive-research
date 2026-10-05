@@ -1,0 +1,689 @@
+<title>Comments at Scale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&family=Google+Sans+Code:wght@400;500&display=swap">
+<style>
+/* Layout: five numbered chapters as tabs; generous vertical rhythm (72px sections), 620px reading measure, charts carry the facts. Pillar hues: marks use --u/--a/--l, text uses --u-ink/--a-ink/--l-ink. */
+:root{
+  --bg:#F8F9FB; --surface:#FFFFFF; --sunk:#EEF1F5;
+  --ink:#1B1F24; --muted:#5F6875; --faint:#8A93A0; --line:#E2E6EB;
+  --accent:#1A5FC8; --accent-soft:#E7EEFB;
+  --u:#1A5FC8; --u-ink:#1A5FC8; --u-soft:#E7EEFB;
+  --a:#B45309; --a-ink:#9A4708; --a-soft:#FBF0E3;
+  --l:#137A4B; --l-ink:#106A41; --l-soft:#E3F3EA;
+  --ai:#6B4FBB; --ai-soft:#EEE9FB;
+  --mark:#FBE7A1; --mark-ink:#3A2C00;
+  --good:#2E7D4F; --warn:#9A6200; --bad:#B23A3A;
+  --shot-bg:#F1F3F5;
+  --f-display:"Google Sans","Product Sans","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Google Sans Text","Google Sans","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"Google Sans Code",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --read:640px; --wide:1120px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121519; --surface:#1A1E24; --sunk:#22272F;
+    --ink:#E8EBEF; --muted:#A0A9B4; --faint:#7A838E; --line:#2D343E;
+    --accent:#8AB4F8; --accent-soft:#1D2B42;
+    --u:#5B93E8; --u-ink:#8AB4F8; --u-soft:#1D2B42;
+    --a:#C97A22; --a-ink:#F0B36A; --a-soft:#3A2915;
+    --l:#3FA874; --l-ink:#7DD3A7; --l-soft:#16301F;
+    --ai:#B7A3F5; --ai-soft:#2A2340;
+    --mark:#5E4A12; --mark-ink:#FFF1C7;
+    --good:#6CCB92; --warn:#E3B55A; --bad:#EE8A8A;
+    --shot-bg:#E9EBEE;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121519; --surface:#1A1E24; --sunk:#22272F;
+  --ink:#E8EBEF; --muted:#A0A9B4; --faint:#7A838E; --line:#2D343E;
+  --accent:#8AB4F8; --accent-soft:#1D2B42;
+  --u:#5B93E8; --u-ink:#8AB4F8; --u-soft:#1D2B42;
+  --a:#C97A22; --a-ink:#F0B36A; --a-soft:#3A2915;
+  --l:#3FA874; --l-ink:#7DD3A7; --l-soft:#16301F;
+  --ai:#B7A3F5; --ai-soft:#2A2340;
+  --mark:#5E4A12; --mark-ink:#FFF1C7;
+  --good:#6CCB92; --warn:#E3B55A; --bad:#EE8A8A;
+  --shot-bg:#E9EBEE;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;padding:0 20px}
+.wrap{max-width:var(--wide);margin:0 auto;padding-block:36px 96px}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:500;line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.01em}
+h3{font-size:1.35rem}
+h4{font-size:1.05rem}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:.85em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:var(--read)}
+.src{font-family:var(--f-mono);font-size:.7rem;white-space:nowrap;color:var(--accent)}
+.src::before{content:"↗ "}
+.u-ink{color:var(--u-ink)} .a-ink{color:var(--a-ink)} .l-ink{color:var(--l-ink)}
+
+/* header + tabs */
+header.top{display:flex;flex-direction:column;gap:14px;padding-block:8px 28px}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -20px;padding:8px 20px 0}
+.tabs-inner{max-width:var(--wide);margin:0 auto;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab{font-family:var(--f-display);font-size:.95rem;font-weight:500;color:var(--muted);text-decoration:none;padding:10px 14px 12px;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab .num{font-family:var(--f-mono);font-size:.7rem;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--sunk)}
+.tab:hover{color:var(--ink)}
+.tab[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab[aria-current="page"] .num{background:var(--ink);color:var(--bg)}
+.panel{padding-top:48px}
+.js .panel:not(.active),.js .subpanel:not(.active){display:none}
+.sec{padding-block:56px}
+.sec+.sec{border-top:1px solid var(--line)}
+.sec-head{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;max-width:var(--read)}
+
+/* hero thesis */
+.thesis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:8px}
+@media (max-width:820px){.thesis{grid-template-columns:1fr}}
+.pill-card{display:flex;flex-direction:column;gap:12px;padding:24px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink);min-width:0}
+.pill-card:hover{border-color:var(--pc)}
+.pill-card.u{--pc:var(--u);--pi:var(--u-ink)} .pill-card.a{--pc:var(--a);--pi:var(--a-ink)} .pill-card.l{--pc:var(--l);--pi:var(--l-ink)}
+.pill-card .nm{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:1.5rem;color:var(--pi)}
+.pill-card .nm i{width:12px;height:12px;border-radius:50%;background:var(--pc)}
+.pill-card p{color:var(--muted)}
+.stage{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.meter{display:inline-flex;gap:3px}
+.meter b{width:18px;height:6px;border-radius:3px;background:var(--line)}
+.meter b.on{background:var(--pc)}
+
+/* answers */
+.answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:820px){.answers{grid-template-columns:1fr}}
+.ans{display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:2px solid var(--ink)}
+.ans .q{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ans .a{font-family:var(--f-display);font-size:1.25rem;line-height:1.3}
+
+/* chart frame */
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px}
+.chart-title{font-family:var(--f-display);font-size:1.1rem;font-weight:500}
+.chart-sub{font-size:.88rem;color:var(--muted);margin-top:4px}
+.chart-foot{font-size:.78rem;color:var(--faint);margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 14px}
+.tip{position:relative}
+.tip[data-tip]:hover::after,.tip[data-tip]:focus::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:var(--ink);color:var(--bg);font-family:var(--f-body);font-size:.78rem;line-height:1.4;padding:8px 10px;border-radius:8px;width:max-content;max-width:260px;white-space:normal;z-index:5;pointer-events:none;text-align:left;font-weight:400}
+
+/* bar chart */
+.bars{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+.bar-row{display:grid;grid-template-columns:minmax(120px,240px) minmax(0,1fr);gap:16px;align-items:center}
+@media (max-width:560px){.bar-row{grid-template-columns:1fr;gap:4px}}
+.bar-label{font-size:.9rem}
+.bar-label small{display:block;font-family:var(--f-mono);font-size:.66rem;color:var(--faint);letter-spacing:.04em}
+.bar-track{display:flex;align-items:center;gap:10px;min-width:0}
+.bar{height:18px;border-radius:0 4px 4px 0;background:var(--faint);min-width:4px}
+.bar.hi{background:var(--accent)}
+.bar-val{font-family:var(--f-display);font-weight:500;font-variant-numeric:tabular-nums;font-size:.95rem;white-space:nowrap}
+
+/* quotes */
+.quotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px}
+@media (max-width:820px){.quotes{grid-template-columns:1fr}}
+.quote{font-family:var(--f-display);font-size:1.08rem;line-height:1.4;display:flex;flex-direction:column;gap:10px}
+.quote cite{font-family:var(--f-body);font-style:normal;font-size:.8rem;color:var(--muted)}
+
+/* coverage grid */
+.cov-wrap{overflow-x:auto;margin-top:24px}
+table.cov{border-collapse:separate;border-spacing:0;width:100%;min-width:560px;font-size:.9rem}
+.cov th,.cov td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.cov thead th{font-family:var(--f-display);font-weight:500;font-size:.95rem;border-bottom:1px solid var(--ink)}
+.cov thead th.c{text-align:center;width:110px}
+.cov .grp td{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:20px;border-bottom:0}
+.cov td.c{text-align:center}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:middle;cursor:default}
+.dot.f{background:var(--pc)}
+.dot.h{border:2.5px solid var(--pc);background:transparent}
+.dot.n{width:10px;height:2px;border-radius:1px;background:var(--line)}
+.cu{--pc:var(--u)} .ca{--pc:var(--a)} .cl{--pc:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.84rem;color:var(--muted);margin-top:18px;align-items:center}
+.legend .dot{--pc:var(--muted);width:13px;height:13px;margin-right:6px}
+
+/* heatmap */
+.heat{display:grid;grid-template-columns:130px repeat(3,minmax(0,1fr));gap:6px;margin-top:24px}
+.heat .hh{font-family:var(--f-display);font-weight:500;font-size:.95rem;padding:4px 6px;display:flex;align-items:center;gap:8px}
+.heat .hh i{width:10px;height:10px;border-radius:50%;background:var(--pc)}
+.heat .rh{font-family:var(--f-display);font-size:.9rem;display:flex;flex-direction:column;justify-content:center}
+.heat .rh small{font-family:var(--f-mono);font-size:.64rem;color:var(--faint)}
+.cell{border-radius:10px;min-height:64px;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:1.3rem;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)}
+.cell.v0{background:var(--sunk);color:var(--faint);font-size:1rem}
+.cell.v1{background:color-mix(in srgb,var(--pc) 16%,var(--surface))}
+.cell.v2{background:color-mix(in srgb,var(--pc) 30%,var(--surface))}
+.cell.v3{background:color-mix(in srgb,var(--pc) 46%,var(--surface))}
+.cell.v4{background:color-mix(in srgb,var(--pc) 64%,var(--surface));color:#fff}
+.cell.v5{background:var(--pc);color:#fff}
+@media (max-width:560px){.heat{grid-template-columns:90px repeat(3,minmax(0,1fr))}.cell{min-height:52px;font-size:1.05rem}}
+
+/* loop matrix */
+table.lm{border-collapse:separate;border-spacing:0;width:100%;min-width:640px}
+.lm th,.lm td{padding:12px 8px;border-bottom:1px solid var(--line);text-align:center;font-size:.9rem}
+.lm th:first-child,.lm td:first-child{text-align:left}
+.lm thead th{font-family:var(--f-display);font-weight:500;border-bottom:1px solid var(--ink)}
+.lm thead th small{display:block;font-family:var(--f-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+.lm tr.ref td{color:var(--muted)}
+.lm td.empty-col{background:color-mix(in srgb,var(--bad) 6%,transparent)}
+
+/* big facts */
+.bigfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px}
+@media (max-width:820px){.bigfacts{grid-template-columns:1fr}}
+.bf{display:flex;flex-direction:column;gap:6px}
+.bf b{font-family:var(--f-display);font-size:2.4rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
+.bf span{font-size:.92rem;color:var(--muted);max-width:30ch}
+
+/* competitive */
+.seg{display:flex;flex-wrap:wrap;gap:6px;padding:6px;background:var(--sunk);border-radius:14px;width:max-content;max-width:100%;margin:28px 0 8px}
+.seg a{font-family:var(--f-display);font-weight:500;font-size:.95rem;text-decoration:none;color:var(--muted);padding:9px 18px;border-radius:10px;display:flex;align-items:center;gap:8px}
+.seg a i{width:10px;height:10px;border-radius:50%;background:var(--faint)}
+.seg a.u i{background:var(--u)} .seg a.a i{background:var(--a)} .seg a.l i{background:var(--l)}
+.seg a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sp-u{--pc:var(--u);--pi:var(--u-ink);--ps:var(--u-soft)} .sp-a{--pc:var(--a);--pi:var(--a-ink);--ps:var(--a-soft)} .sp-l{--pc:var(--l);--pi:var(--l-ink);--ps:var(--l-soft)}
+.p-hero{padding-block:48px 24px;display:flex;flex-direction:column;gap:14px}
+.p-hero .kick{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pi);font-weight:500}
+.p-strip{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;margin-top:6px}
+.cujs{display:flex;flex-direction:column;gap:10px;margin-top:20px;max-width:760px}
+.cuj{display:flex;gap:14px;align-items:baseline;font-family:var(--f-display);font-size:1.05rem}
+.cuj span{font-family:var(--f-mono);font-size:.68rem;color:var(--pi);white-space:nowrap;letter-spacing:.04em}
+.pat{padding-block:48px;border-top:1px solid var(--line)}
+.pat-head{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.pat-num{font-family:var(--f-mono);font-size:.72rem;color:var(--pi);letter-spacing:.06em}
+.pat-head p{color:var(--muted)}
+.who{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px 28px;margin-bottom:28px}
+.who div{font-size:.9rem;line-height:1.45;padding-left:12px;border-left:2px solid var(--line)}
+.who b{font-family:var(--f-display);font-weight:500;display:block}
+.who span{color:var(--muted)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:24px 20px}
+.shot{margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.shot-img{display:block;width:100%;aspect-ratio:16/10;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--shot-bg);cursor:zoom-in;overflow:hidden}
+.shot-img img{display:block;width:100%;height:100%;object-fit:contain;object-position:center top}
+.shot-img:hover{border-color:var(--accent)}
+.shot figcaption{display:flex;flex-direction:column;gap:2px;font-size:.88rem}
+.shot figcaption b{font-family:var(--f-display);font-weight:500;font-size:.78rem;color:var(--muted)}
+.shot figcaption .t{font-family:var(--f-display);font-size:.98rem;line-height:1.3}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:56px;flex-wrap:wrap}
+.pager a{font-family:var(--f-display);font-weight:500;text-decoration:none;color:var(--ink);padding:12px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.pager a.next{margin-left:auto}
+.pager a:hover{border-color:var(--accent)}
+
+/* design */
+.princ{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px}
+@media (max-width:820px){.princ{grid-template-columns:1fr}}
+.princ h4{display:flex;align-items:center;gap:10px;color:var(--pi);font-size:1.2rem;margin-bottom:16px}
+.princ h4 i{width:12px;height:12px;border-radius:50%;background:var(--pc)}
+.princ ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.princ li b{font-family:var(--f-display);font-weight:500;display:block;font-size:1.02rem}
+.princ li span{font-size:.9rem;color:var(--muted)}
+.loopfig{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:40px;align-items:center}
+@media (max-width:820px){.loopfig{grid-template-columns:1fr}}
+.loopfig svg{width:100%;height:auto;max-width:380px;display:block;margin:0 auto}
+.lp-ring{fill:none;stroke:var(--line);stroke-width:2}
+.lp-node circle{stroke:var(--surface);stroke-width:3}
+.lp-node.u circle{fill:var(--u)} .lp-node.a circle{fill:var(--a)} .lp-node.l circle{fill:var(--l)}
+.lp-node text{fill:#fff;font-family:var(--f-mono);font-size:13px;font-weight:500;text-anchor:middle;dominant-baseline:central}
+.lp-lab{fill:var(--ink);font-family:var(--f-display);font-size:14px;font-weight:500}
+.lp-c1{fill:var(--ink);font-family:var(--f-display);font-size:17px;font-weight:500;text-anchor:middle}
+.lp-c2{fill:var(--muted);font-family:var(--f-body);font-size:12px;text-anchor:middle}
+.lp-arrow{fill:var(--faint)}
+.xgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 32px}
+@media (max-width:860px){.xgrid{grid-template-columns:1fr}}
+.xcard{display:flex;flex-direction:column;gap:12px;min-width:0}
+.xcard .xn{font-family:var(--f-mono);font-size:.7rem;color:var(--pi);letter-spacing:.06em}
+.xcard p{font-size:.92rem;color:var(--muted)}
+.opps{display:flex;flex-direction:column}
+.opp{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1fr);gap:20px;padding-block:18px;border-bottom:1px solid var(--line);align-items:baseline}
+.opp:first-child{border-top:1px solid var(--line)}
+@media (max-width:760px){.opp{grid-template-columns:1fr;gap:4px}}
+.opp .tg{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--pi);display:flex;align-items:center;gap:8px}
+.opp .tg i{width:9px;height:9px;border-radius:50%;background:var(--pc)}
+.opp h4{font-size:1.02rem}
+.opp p{font-size:.9rem;color:var(--muted)}
+.opp p b{font-family:var(--f-display);font-weight:500;color:var(--ink)}
+.flag{display:inline-block;font-family:var(--f-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;background:var(--mark);color:var(--mark-ink);padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle}
+
+/* sketches */
+.sketch{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-family:var(--f-display);font-size:.84rem;line-height:1.4}
+.sk-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--sunk);font-weight:500}
+.sk-bar .dots{display:flex;gap:5px}
+.sk-bar .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block}
+.sk-body{padding:12px;display:flex;flex-direction:column;gap:10px}
+.sk-cap{display:none}
+.ai-box{border:1px dashed var(--ai);background:var(--ai-soft);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ai-box .lab{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ai)}
+.cmt{display:flex;gap:8px;align-items:flex-start}
+.av{flex:0 0 22px;height:22px;border-radius:50%;background:var(--sunk);border:1px solid var(--line);font-size:.65rem;display:grid;place-items:center;color:var(--muted)}
+.cmt .t{min-width:0}
+.cmt .n{font-weight:500;font-size:.78rem}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px}
+.sbtn{font-family:var(--f-display);font-size:.75rem;padding:4px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.sbtn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sbtn.ai{border-color:var(--ai);color:var(--ai)}
+.pill{font-family:var(--f-mono);font-size:.64rem;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.ok{color:var(--good);border-color:var(--good)}
+.pill.w{color:var(--warn);border-color:var(--warn)}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.check{display:flex;gap:8px;align-items:flex-start;padding:7px 8px;border:1px solid var(--line);border-radius:6px}
+.box{flex:0 0 14px;height:14px;border:1.5px solid var(--muted);border-radius:3px;margin-top:2px}
+.box.on{background:var(--ink);border-color:var(--ink)}
+.scope-pick{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;width:max-content;max-width:100%}
+.scope-pick span{padding:3px 9px;font-size:.72rem;border-right:1px solid var(--line)}
+.scope-pick span:last-child{border-right:0}
+.scope-pick .on{background:var(--ink);color:var(--bg)}
+.diff{font-family:var(--f-mono);font-size:.7rem;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.diff div{padding:3px 8px;white-space:pre-wrap;word-break:break-word}
+.diff .plus{background:color-mix(in srgb,var(--good) 14%,transparent)}
+.diff .minus{background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.split{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px}
+@media (max-width:480px){.split{grid-template-columns:1fr}}
+.qlist{display:flex;flex-direction:column;gap:4px;font-size:.74rem}
+.qlist div{padding:5px 7px;border-radius:5px;border:1px solid var(--line);display:flex;justify-content:space-between;gap:6px}
+.qlist .cur{background:var(--sunk);border-color:var(--ink)}
+.input{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted)}
+.scopechip{font-family:var(--f-mono);font-size:.66rem;background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:4px}
+.sug{border:1px dashed var(--ai);color:var(--ai);border-radius:999px;padding:1px 8px;font-size:.72rem}
+.human{border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:.72rem}
+
+/* questions */
+.qs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 40px}
+@media (max-width:760px){.qs{grid-template-columns:1fr}}
+.qn{display:flex;flex-direction:column;gap:8px}
+.qn .k{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.qn h4{font-size:1.2rem;line-height:1.3}
+.qn p{font-size:.9rem;color:var(--muted)}
+.unk{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;max-width:var(--read)}
+.unk li{padding-left:22px;position:relative;font-size:.95rem}
+.unk li::before{content:"?";position:absolute;left:0;top:0;font-family:var(--f-mono);color:var(--faint)}
+
+/* sources */
+.sources{columns:2 320px;column-gap:40px;font-size:.88rem}
+.sources h4{break-after:avoid;margin:18px 0 8px;font-size:.92rem}
+.sources ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.sources li{break-inside:avoid}
+.credit{font-size:.84rem;color:var(--muted);max-width:var(--read);margin-top:24px}
+
+dialog#lightbox{max-width:min(1400px,96vw);max-height:94vh;width:auto;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}
+dialog#lightbox::backdrop{background:rgba(10,14,20,.72)}
+#lb-img{display:block;max-width:100%;max-height:72vh;margin:0 auto;background:var(--shot-bg);border-radius:8px}
+.lb-meta{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-width:900px;font-size:.9rem}
+.lb-meta b{font-family:var(--f-display);font-weight:500;font-size:1rem}
+.lb-meta .d{color:var(--muted)}
+.lb-close{float:right;font-family:var(--f-display);font-size:.8rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:4px 10px;margin-bottom:10px;cursor:pointer}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-size:.82rem;color:var(--faint)}
+</style>
+<script>document.documentElement.classList.add('js');</script>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Research brief · October 2026</div>
+  <h1>Comments at Scale</h1>
+  <p class="lead">How products help people and agents understand, act on, and learn from comments across a team, folder or workspace.</p>
+</header>
+
+<nav class="tabs" aria-label="Chapters"><div class="tabs-inner">
+  <a class="tab" href="#overview" data-tab="overview"><span class="num">1</span>Overview</a>
+  <a class="tab" href="#competitive" data-tab="competitive"><span class="num">2</span>Competitive landscape</a>
+  <a class="tab" href="#design" data-tab="design"><span class="num">3</span>Principles &amp; explorations</a>
+  <a class="tab" href="#questions" data-tab="questions"><span class="num">4</span>Open questions</a>
+  <a class="tab" href="#sources" data-tab="sources"><span class="num">5</span>Sources</a>
+</div></nav>
+
+<!-- ============ 1 OVERVIEW ============ -->
+<div class="panel" id="overview">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">The framework</div><h2>Three jobs, three levels of maturity</h2></div>
+    <div class="thesis">
+      <a class="pill-card u" href="#understand"><span class="nm"><i></i>Understand</span><p>Summarize, cluster and catch up on many comments.</p><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b class="on"></b></span>Table stakes</span></a>
+      <a class="pill-card a" href="#act"><span class="nm"><i></i>Act</span><p>Apply, resolve, delegate or route comments in bulk.</p><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b></b></span>Emerging</span></a>
+      <a class="pill-card l" href="#learn"><span class="nm"><i></i>Learn</span><p>Turn comments into rules and context for future work.</p><span class="stage"><span class="meter"><b class="on"></b><b></b><b></b></span>Frontier</span></a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="eyebrow">Short answers</div><h2>Your three questions</h2></div>
+    <div class="answers">
+      <div class="ans"><span class="q">Real problem?</span><span class="a">Yes. Review is now the bottleneck.</span><a href="#evidence" class="src">evidence</a></div>
+      <div class="ans"><span class="q">How is it solved?</span><span class="a">8 patterns across Understand, Act, Learn.</span><a href="#competitive" class="src">landscape</a></div>
+      <div class="ans"><span class="q">Data analytics?</span><span class="a">Fixes land in shared context, but human comments are left out.</span><a href="#data-lens" class="src">data lens</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="evidence">
+    <div class="sec-head"><div class="eyebrow">Evidence</div><h2>Output is up. Review can't keep up.</h2></div>
+    <div class="chart">
+      <div class="chart-title">Change on high-AI-adoption engineering teams</div>
+      <div class="chart-sub">% change vs. low adoption · review-related metrics highlighted</div>
+      <div class="bars">
+        <div class="bar-row"><div class="bar-label">PRs merged<small>2025 · 10k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+98% PRs merged per developer. Faros AI Productivity Paradox, 2025"><div class="bar" style="width:22.2%"></div><span class="bar-val">+98%</span></div></div>
+        <div class="bar-row"><div class="bar-label">PR review time<small>2025 · 10k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+91% PR review time. Faros AI Productivity Paradox, 2025"><div class="bar hi" style="width:20.6%"></div><span class="bar-val">+91%</span></div></div>
+        <div class="bar-row"><div class="bar-label">Median time in review<small>2026 · 22k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+441% median time in PR review. Faros AI Engineering Report, 2026"><div class="bar hi" style="width:100%"></div><span class="bar-val">+441%</span></div></div>
+        <div class="bar-row"><div class="bar-label">Bugs per PR<small>2026 · 22k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+54% bugs per PR. Faros AI Engineering Report, 2026"><div class="bar" style="width:12.2%"></div><span class="bar-val">+54%</span></div></div>
+        <div class="bar-row"><div class="bar-label">PRs merged with no review<small>2026 · 22k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+31% more PRs merged without any review. Faros AI Engineering Report, 2026"><div class="bar hi" style="width:7%"></div><span class="bar-val">+31%</span></div></div>
+      </div>
+      <div class="chart-foot"><a class="src" href="https://www.faros.ai/blog/ai-software-engineering">Faros 2025</a><a class="src" href="https://www.faros.ai/blog/ai-code-quality-senior-engineer-review-burden">Faros 2026</a></div>
+    </div>
+    <div class="quotes">
+      <div class="quote">"Open it a week later with 40+ comments."<cite>Designer asking Figma for comment summaries, 2025 · <a class="src" href="https://forum.figma.com/suggest-a-feature-11/summarise-all-comments-into-next-steps-with-figma-ai-36882">forum</a></cite></div>
+      <div class="quote">Data teams can't read "hundreds of individual Threads."<cite>Hex, on why it built a Review Agent · <a class="src" href="https://hex.tech/blog/introducing-context-suggestions/">blog</a></cite></div>
+      <div class="quote">4 major platforms shipped comment summaries in 2025–26.<cite>Google, Microsoft, Atlassian, Figma · <a class="src" href="https://workspaceupdates.googleblog.com/2026/07/streamline-collaboration-in-google-docs-with-Gemini-powered-comment-workflows.html">Google</a></cite></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="eyebrow">Who does what</div><h2>Docs tools understand. Code and data tools learn.</h2></div>
+    <div class="chart">
+      <div class="chart-title">Capability by product</div>
+      <div class="chart-sub">Based on public docs reviewed · hover a dot for detail</div>
+      {{coverage}}
+      <div class="legend"><span><span class="dot f"></span>AI-assisted</span><span><span class="dot h"></span>Basic or manual</span><span><span class="dot n"></span>&nbsp;None found</span></div>
+    </div>
+  </section>
+  <div class="pager"><a class="next" href="#competitive">2 · Competitive landscape →</a></div>
+</div>
+
+<!-- ============ 2 COMPETITIVE ============ -->
+<div class="panel" id="competitive">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">2 · Competitive landscape</div><h2>Where products reach today</h2><p class="muted">Facts only. Number of products shipping each pillar at each scope.</p></div>
+    <div class="chart">
+      <div class="chart-title">Products by pillar and scope</div>
+      <div class="chart-sub">Hover a cell for the products</div>
+      {{heat}}
+      <div class="chart-foot">Learning skips the artifact level. Acting rarely reaches past one artifact.</div>
+    </div>
+  </section>
+
+  <nav class="seg" aria-label="Pillars">
+    <a class="u" href="#understand" data-sub="understand"><i></i>Understand</a>
+    <a class="a" href="#act" data-sub="act"><i></i>Act</a>
+    <a class="l" href="#learn" data-sub="learn"><i></i>Learn</a>
+    <a href="#data-lens" data-sub="data-lens"><i></i>Data lens</a>
+  </nav>
+
+  <!-- UNDERSTAND -->
+  <div class="subpanel sp-u" id="understand">
+    <div class="p-hero">
+      <span class="kick">Pillar 1 · Understand</span>
+      <h2>Make sense of comments without reading them all</h2>
+      <div class="p-strip"><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b class="on"></b></span>Table stakes</span><span class="stage">7 products · 10 screenshots</span></div>
+      <div class="cujs">
+        <div class="cuj"><span>CUJ U-1</span>"40 comments. What's unresolved, and who's waiting on me?"</div>
+        <div class="cuj"><span>CUJ U-2</span>"What changed across my files since I last looked?"</div>
+        <div class="cuj"><span>CUJ U-3</span>"What are people asking for most?"</div>
+      </div>
+    </div>
+    <article class="pat" id="p-digest">
+      <div class="pat-head"><span class="pat-num">U1 · Artifact · CUJ U-1</span><h3>Digest at the top of the comment panel</h3></div>
+      <div class="who">
+        <div><b>Confluence</b><span>Auto-summary of unresolved comments at 3+; refresh, copy, rate.</span> <a class="src" href="https://support.atlassian.com/confluence-cloud/docs/summarize-comments-using-atlassian-intelligence/">docs</a></div>
+        <div><b>Figma agent</b><span>Groups a file's comments into themes and statuses.</span> <a class="src" href="https://www.figma.com/solutions/ai-comment-summarizer/">page</a></div>
+        <div><b>Word Copilot</b><span>Activity tab by time window; Discussion tab for comments.</span> <a class="src" href="https://office-watch.com/2025/copilot-word-365-document-summary-gets-better-for-some/">source</a></div>
+        <div><b>FigJam AI</b><span>Sorts stickies into themes; writes a summary to the board.</span> <a class="src" href="https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI">help</a></div>
+        <div><b>Tableau</b><span>Comments with view snapshots. No AI on comments found.</span> <a class="src" href="https://help.tableau.com/current/pro/desktop/en-us/comment.htm">help</a></div>
+      </div>
+      {{shots:confluence-summary,figma-agent-summary,word-copilot-tabs,figjam-summary,figjam-sort,tableau-comments}}
+    </article>
+    <article class="pat" id="p-ask">
+      <div class="pat-head"><span class="pat-num">U2 · Folder → workspace · CUJ U-2, U-3</span><h3>Ask the comments, with a scope</h3></div>
+      <div class="who">
+        <div><b>Gemini in Docs</b><span>"Summarize comments from Sarah"; "what's unresolved?" (Jul 2026).</span> <a class="src" href="https://workspaceupdates.googleblog.com/2026/07/streamline-collaboration-in-google-docs-with-Gemini-powered-comment-workflows.html">announcement</a></div>
+        <div><b>Drive Catch me up</b><span>Changes and comments across files since your last visit.</span> <a class="src" href="https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html">announcement</a></div>
+        <div><b>Productboard Spark</b><span>Themes with note and customer counts.</span> <a class="src" href="https://support.productboard.com/hc/en-us/articles/360060759874-Productboard-Release-Notes">notes</a></div>
+      </div>
+      {{shots:gdocs-summary,drive-catchup,drive-badge,productboard-spark}}
+    </article>
+    <div class="pager"><a href="#overview">← Overview</a><a class="next" href="#act">Act →</a></div>
+  </div>
+
+  <!-- ACT -->
+  <div class="subpanel sp-a" id="act">
+    <div class="p-hero">
+      <span class="kick">Pillar 2 · Act</span>
+      <h2>Turn comments into changes, in bulk</h2>
+      <div class="p-strip"><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b></b></span>Emerging</span><span class="stage">10 products · 14 screenshots</span></div>
+      <div class="cujs">
+        <div class="cuj"><span>CUJ A-1</span>"Hand these comments to an agent to fix."</div>
+        <div class="cuj"><span>CUJ A-2</span>"Apply all the suggestions at once, keep who said what."</div>
+        <div class="cuj"><span>CUJ A-3</span>"Route every piece of feedback to the right owner."</div>
+      </div>
+    </div>
+    <article class="pat" id="p-delegate">
+      <div class="pat-head"><span class="pat-num">A1 · Thread → artifact · CUJ A-1</span><h3>Delegate a comment to an agent</h3></div>
+      <div class="who">
+        <div><b>GitHub Copilot</b><span>"Fix with Copilot" on review comments, incl. mobile.</span> <a class="src" href="https://github.blog/changelog/2026-07-17-github-mobile-fix-pull-request-comments-with-copilot-cloud-agent/">changelog</a></div>
+        <div><b>Cursor Bugbot</b><span>Autofix prepares the fix; you click Create PR.</span> <a class="src" href="https://cursor.com/docs/bugbot">docs</a></div>
+        <div><b>Gemini in Docs</b><span>Drafts replies, comments and edits from feedback.</span> <a class="src" href="https://www.androidauthority.com/gemini-google-docs-comments-3692242/">source</a></div>
+        <div><b>Vercel</b><span>CLI lists, replies to, resolves comments; JSON for agents.</span> <a class="src" href="https://vercel.com/changelog/manage-vercel-toolbar-comments-from-the-cli">changelog</a></div>
+        <div><b>Notion agents</b><span>Trigger on a new comment or an @mention.</span> <a class="src" href="https://www.notion.com/help/custom-agents">docs</a></div>
+      </div>
+      {{shots:copilot-fix-mobile,bugbot-autofix,gdocs-draft-changes,gdocs-ai-comments,gdocs-video,vercel-cli}}
+    </article>
+    <article class="pat" id="p-batch">
+      <div class="pat-head"><span class="pat-num">A2 · Artifact · CUJ A-2</span><h3>Batch apply and batch resolve</h3></div>
+      <div class="who">
+        <div><b>GitHub</b><span>Batch suggestions → one commit; all suggesters co-author.</span> <a class="src" href="https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/incorporating-feedback-in-your-pull-request">docs</a></div>
+        <div><b>Cursor Bugbot</b><span>"Fix All" applies many fixes at once.</span> <a class="src" href="https://cursor.com/changelog/04-08-26">changelog</a></div>
+        <div><b>CodeRabbit</b><span>One command resolves all its comments.</span> <a class="src" href="https://github.com/coderabbitai/coderabbit-docs/pull/462">commands</a></div>
+        <div><b>Confluence</b><span>Mark all read, mark all resolved.</span> <a class="src" href="https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/">help</a></div>
+        <div><b>Frame.io</b><span>Exports only the filtered comments.</span> <a class="src" href="https://help.frame.io/en/articles/9105278-comments-panel-overview">help</a></div>
+      </div>
+      {{shots:github-batch,copilot-review-comment,confluence-filters,frameio-filters,frameio-export}}
+    </article>
+    <article class="pat" id="p-triage">
+      <div class="pat-head"><span class="pat-num">A3 · Team inbox · CUJ A-3</span><h3>Triage inbox with AI suggestions</h3></div>
+      <div class="who">
+        <div><b>Linear Triage Intelligence</b><span>Suggests owner, labels, duplicates, with reasons; kept visually apart from human values.</span> <a class="src" href="https://linear.app/now/how-we-built-triage-intelligence">write-up</a></div>
+        <div><b>Linear rules</b><span>Fixed rules run after the AI.</span> <a class="src" href="https://linear.app/now/cx-in-linear">source</a></div>
+      </div>
+      {{shots:linear-inbox,linear-triage-intel,linear-rule}}
+    </article>
+    <div class="pager"><a href="#understand">← Understand</a><a class="next" href="#learn">Learn →</a></div>
+  </div>
+
+  <!-- LEARN -->
+  <div class="subpanel sp-l" id="learn">
+    <div class="p-hero">
+      <span class="kick">Pillar 3 · Learn</span>
+      <h2>Turn comments into context for future work</h2>
+      <div class="p-strip"><span class="stage"><span class="meter"><b class="on"></b><b></b><b></b></span>Frontier</span><span class="stage">10 products · 25 screenshots</span></div>
+      <div class="cujs">
+        <div class="cuj"><span>CUJ L-1</span>"Stop me leaving the same comment every week."</div>
+        <div class="cuj"><span>CUJ L-2</span>"Show where our data agent went wrong, and fix its context."</div>
+        <div class="cuj"><span>CUJ L-3</span>"Have experts grade answers so we can measure quality."</div>
+      </div>
+    </div>
+    <article class="pat" id="p-rule">
+      <div class="pat-head"><span class="pat-num">L1 · Repo → org · CUJ L-1</span><h3>Promote a comment into a rule</h3></div>
+      <div class="who">
+        <div><b>CodeRabbit</b><span>Learnings from chat; repo or org scope; usage counts.</span> <a class="src" href="https://docs.coderabbit.ai/knowledge-base/learnings">docs</a></div>
+        <div><b>Cursor Bugbot</b><span>Rules from reactions and replies; auto-promote and disable. 110k+ repos, 44k+ rules.</span> <a class="src" href="https://cursor.com/blog/bugbot-learning">blog</a></div>
+        <div><b>Linear</b><span>Plain-language workspace guidance for triage.</span> <a class="src" href="https://linear.app/now/how-we-built-triage-intelligence">blog</a></div>
+        <div><b>ThoughtSpot</b><span>Coaching saves reference questions and business terms.</span> <a class="src" href="https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps">docs</a></div>
+      </div>
+      {{shots:coderabbit-learning,coderabbit-dashboard,bugbot-rule,bugbot-loop,bugbot-chart,linear-guidance,spotter-review-terms,spotter-fix-term}}
+    </article>
+    <article class="pat" id="p-review">
+      <div class="pat-head"><span class="pat-num">L2 · Space → workspace · CUJ L-2</span><h3>Review agent → suggestion feed</h3></div>
+      <div class="who">
+        <div><b>Hex</b><span>Review Agent → suggestion → diff → preview → publish.</span> <a class="src" href="https://hex.tech/blog/introducing-context-suggestions/">blog</a></div>
+        <div><b>Databricks Genie</b><span>Monitor tab, weekly digest, "Analyze Space Usage", benchmarks.</span> <a class="src" href="https://docs.databricks.com/aws/en/genie-agents/monitor">docs</a></div>
+        <div><b>Snowflake Cortex</b><span>Up to 10 verified-query suggestions from usage. No screenshot found.</span> <a class="src" href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst/verified-query-suggestions">docs</a></div>
+        <div><b>Looker</b><span>Traces and feedback; manual instructions and golden queries.</span> <a class="src" href="https://docs.cloud.google.com/looker/docs/conversational-analytics-looker-rollout">docs</a></div>
+      </div>
+      {{shots:hex-loop,hex-dashboard,hex-warning,hex-suggestions,hex-diff,hex-preview,hex-topics,hex-inspector,genie-monitor,genie-digest,genie-benchmarks,genie-eval}}
+    </article>
+    <article class="pat" id="p-queue">
+      <div class="pat-head"><span class="pat-num">L3 · Org schema · CUJ L-3</span><h3>Structured review queues</h3></div>
+      <div class="who">
+        <div><b>LangSmith</b><span>Rubric queues, pairwise review, statuses, export to datasets.</span> <a class="src" href="https://docs.langchain.com/langsmith/annotation-queues">docs</a></div>
+        <div><b>MLflow</b><span>Expert labeling sessions with label schemas.</span> <a class="src" href="https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions">docs</a></div>
+      </div>
+      {{shots:langsmith-bulk,langsmith-queue,langsmith-pairwise,mlflow-session,mlflow-assess}}
+    </article>
+    <div class="pager"><a href="#act">← Act</a><a class="next" href="#data-lens">Data lens →</a></div>
+  </div>
+
+  <!-- DATA LENS -->
+  <div class="subpanel" id="data-lens">
+    <div class="p-hero">
+      <span class="kick" style="color:var(--muted)">Lens · Data analytics</span>
+      <h2>Data comments dispute meaning, so fixes go to shared context</h2>
+      <p class="lead">"Active user", "fiscal Q1", "which join": the same dispute recurs on every dashboard that uses the metric.</p>
+    </div>
+    <div class="bigfacts">
+      <div class="bf"><b>0 of 6</b><span>data products reviewed use human dashboard or notebook comments as input</span></div>
+      <div class="bf"><b>0 of 6</b><span>retire stale context automatically (Bugbot does, in code review)</span></div>
+      <div class="bf"><b>2 of 6</b><span>test a context change before it goes live (Genie benchmarks, Hex preview)</span></div>
+    </div>
+    <div class="chart" style="margin-top:40px">
+      <div class="chart-title">Feedback-to-context loop coverage</div>
+      <div class="chart-sub">Which steps each product ships · Cursor Bugbot shown for reference</div>
+      <div class="cov-wrap">{{loopmatrix}}</div>
+      <div class="legend"><span><span class="dot f"></span>Shipped</span><span><span class="dot h"></span>Partial or manual</span><span><span class="dot n"></span>&nbsp;None found</span></div>
+    </div>
+    <div class="pager"><a href="#learn">← Learn</a><a class="next" href="#design">3 · Principles &amp; explorations →</a></div>
+  </div>
+</div>
+
+<!-- ============ 3 DESIGN ============ -->
+<div class="panel" id="design">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">3 · Principles &amp; explorations</div><h2>What the landscape suggests</h2><p class="muted">Interpretation and early sketches. Not specs.</p></div>
+    <div class="princ">
+      <div class="sp-u"><h4><i></i>Understand</h4><ul>
+        <li><b>Keep provenance</b><span>Every summary line links to its comments.</span></li>
+        <li><b>Keep frequency</b><span>Count people per theme.</span></li>
+        <li><b>Show coverage</b><span>"Read 14 of 16 files."</span></li>
+        <li><b>Group by action</b><span>"Needs owner" beats topic.</span></li></ul></div>
+      <div class="sp-a"><h4><i></i>Act</h4><ul>
+        <li><b>Filter, then act</b><span>Show the batch before applying.</span></li>
+        <li><b>Keep attribution</b><span>Credit every commenter.</span></li>
+        <li><b>Proposed ≠ decided</b><span>AI suggestions look different.</span></li>
+        <li><b>Comments as data</b><span>API, CLI or MCP for agents.</span></li></ul></div>
+      <div class="sp-l"><h4><i></i>Learn</h4><ul>
+        <li><b>Choosable scope</b><span>Every rule says how far it reaches.</span></li>
+        <li><b>Show evidence</b><span>Which comments, how many people.</span></li>
+        <li><b>Test before apply</b><span>Preview on past questions.</span></li>
+        <li><b>Lifecycle</b><span>Candidate → promoted → retired.</span></li></ul></div>
+    </div>
+  </section>
+
+  <section class="sec" id="d-loop">
+    <div class="loopfig">
+      {{loopsvg}}
+      <div class="sec-head" style="margin:0"><div class="eyebrow">Framework</div><h2>One loop from feedback to context</h2><p class="muted">Understand captures and clusters. Act decides. Learn applies, verifies and retires. Most data products stop at Apply.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="d-explorations">
+    <div class="sec-head"><div class="eyebrow">Explorations</div><h2>Eight sketches, one per pattern</h2></div>
+    <div class="xgrid">
+      <div class="xcard sp-u"><span class="xn">U1 · builds on Confluence, Figma</span><h4>Digest with counts and owners</h4>{{sketch:0}}</div>
+      <div class="xcard sp-u"><span class="xn">U2 · builds on Drive, Gemini</span><h4>Scoped question with coverage</h4>{{sketch:1}}</div>
+      <div class="xcard sp-a"><span class="xn">A1 · builds on Copilot, Bugbot</span><h4>Hand off and report in the thread</h4>{{sketch:2}}</div>
+      <div class="xcard sp-a"><span class="xn">A2 · builds on GitHub, Frame.io</span><h4>Batch tray that shows its filter</h4>{{sketch:3}}</div>
+      <div class="xcard sp-a"><span class="xn">A3 · builds on Linear</span><h4>Dashed chips for AI suggestions</h4>{{sketch:4}}</div>
+      <div class="xcard sp-l"><span class="xn">L1 · builds on CodeRabbit, Bugbot</span><h4>Rule with scope and track record</h4>{{sketch:5}}</div>
+      <div class="xcard sp-l"><span class="xn">L2 · builds on Hex, Genie</span><h4>Problem-first suggestion feed</h4>{{sketch:6}}</div>
+      <div class="xcard sp-l"><span class="xn">L3 · builds on LangSmith, MLflow</span><h4>Rubric that keeps the reason</h4>{{sketch:7}}</div>
+    </div>
+  </section>
+
+  <section class="sec" id="d-opportunities">
+    <div class="sec-head"><div class="eyebrow">Opportunities</div><h2>Where products fall short</h2></div>
+    <div class="opps">
+      <div class="opp sp-l"><span class="tg"><i></i>Learn</span><h4>Human data comments skip the loop <span class="flag">largest</span></h4><p><b>Try:</b> feed dashboard and notebook comments to the review agent.</p></div>
+      <div class="opp sp-u"><span class="tg"><i></i>Understand</span><h4>Same dispute, 12 dashboards</h4><p><b>Try:</b> cluster comments by metric or column, via lineage.</p></div>
+      <div class="opp sp-u"><span class="tg"><i></i>Understand</span><h4>No frequency, no coverage</h4><p><b>Try:</b> counts per theme; "read 14 of 16".</p></div>
+      <div class="opp sp-a"><span class="tg"><i></i>Act</span><h4>Batching stops at one artifact</h4><p><b>Try:</b> act on a theme across a folder.</p></div>
+      <div class="opp sp-a"><span class="tg"><i></i>Act</span><h4>Thumbs carry no reason</h4><p><b>Try:</b> one structured follow-up on disagreement.</p></div>
+      <div class="opp sp-l"><span class="tg"><i></i>Learn</span><h4>Unclear authority and blast radius</h4><p><b>Try:</b> owner per scope; preview affected answers.</p></div>
+      <div class="opp sp-l"><span class="tg"><i></i>Learn</span><h4>Context never expires</h4><p><b>Try:</b> hit rates and auto-retire; a per-dashboard scope.</p></div>
+    </div>
+  </section>
+  <div class="pager"><a href="#data-lens">← Competitive landscape</a><a class="next" href="#questions">4 · Open questions →</a></div>
+</div>
+
+<!-- ============ 4 QUESTIONS ============ -->
+<div class="panel" id="questions">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">4 · Open questions</div><h2>Decisions ahead</h2></div>
+    <div class="qs">
+      <div class="qn"><span class="k">Strategy</span><h4>Which pillar is our product's job, and in what order?</h4><p>Understand is table stakes; Act and Learn still differentiate.</p></div>
+      <div class="qn"><span class="k">Users</span><h4>Whose comments: human, human-to-agent, or agent?</h4><p>The largest gap is human comments feeding Learn.</p></div>
+      <div class="qn"><span class="k">Learn</span><h4>Who can promote a comment to a workspace rule?</h4><p>Without an owner per scope, rules conflict.</p></div>
+      <div class="qn"><span class="k">Act</span><h4>What is the unit of a batch?</h4><p>For data, "this metric" may beat "this folder".</p></div>
+      <div class="qn"><span class="k">Success</span><h4>What proves it worked?</h4><p>Repeat comments, benchmark accuracy, analyst escalations.</p></div>
+      <div class="qn"><span class="k">Trust</span><h4>What must never be automated?</h4><p>Data tools keep a human approval step; Bugbot auto-promotes.</p></div>
+    </div>
+  </section>
+  <section class="sec">
+    <div class="sec-head"><div class="eyebrow">Research gaps</div><h3>Not yet verified</h3></div>
+    <ul class="unk">
+      <li>Screenshots of Snowflake suggestions and Notion comment triggers.</li>
+      <li>Whether Gemini's comment features span a folder or one doc only.</li>
+      <li>Adoption data for comment summaries. None published.</li>
+      <li>Power BI and Dovetail feedback screens.</li>
+      <li>Permission handling when summaries span partly restricted files.</li>
+    </ul>
+  </section>
+  <div class="pager"><a href="#design">← Principles &amp; explorations</a><a class="next" href="#sources">5 · Sources →</a></div>
+</div>
+
+<!-- ============ 5 SOURCES ============ -->
+<div class="panel" id="sources">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">5 · Sources</div><h2>Sources</h2></div>
+    {{sourcelist}}
+    <p class="credit">Screenshots belong to their companies and come from public docs, blogs, changelogs, launch videos, or press where noted. Sketches are mine and illustrative.</p>
+  </section>
+  <div class="pager"><a href="#questions">← Open questions</a><a class="next" href="#overview">Back to Overview ↺</a></div>
+</div>
+
+<footer>Research compiled October 2026. Product capabilities change quickly; check the source before citing a detail.</footer>
+</div>
+
+<dialog id="lightbox" aria-label="Screenshot"><form method="dialog"><button class="lb-close" aria-label="Close">Close ✕</button></form><img id="lb-img" alt=""><div class="lb-meta"><b id="lb-t"></b><span id="lb-c"></span><span class="d" id="lb-d"></span><a class="src" id="lb-s" href="#"></a></div></dialog>
+
+<script>
+(function(){
+  var panels=[].slice.call(document.querySelectorAll('.panel'));
+  var subs=[].slice.call(document.querySelectorAll('.subpanel'));
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var segs=[].slice.call(document.querySelectorAll('.seg a'));
+  function setActive(pid,sid){
+    panels.forEach(function(p){p.classList.toggle('active',p.id===pid);});
+    if(pid==='competitive'){ sid=sid||'understand';
+      subs.forEach(function(s){s.classList.toggle('active',s.id===sid);});
+      segs.forEach(function(s){ if(s.dataset.sub===sid) s.setAttribute('aria-current','page'); else s.removeAttribute('aria-current');});
+    }
+    tabs.forEach(function(t){ if(t.dataset.tab===pid) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current');});
+  }
+  function route(){
+    var h=(location.hash||'').slice(1), el=h&&document.getElementById(h);
+    if(!el){setActive('overview');window.scrollTo(0,0);return;}
+    var p=el.classList.contains('panel')?el:el.closest('.panel');
+    var s=el.classList.contains('subpanel')?el:el.closest('.subpanel');
+    setActive(p?p.id:'overview',s?s.id:null);
+    if(el===p){window.scrollTo(0,0);}
+    else if(el===s){var seg=document.querySelector('.seg'); requestAnimationFrame(function(){seg.scrollIntoView({block:'start'});});}
+    else requestAnimationFrame(function(){el.scrollIntoView({block:'start'});});
+  }
+  window.addEventListener('hashchange',route); route();
+  var dlg=document.getElementById('lightbox'),img=document.getElementById('lb-img');
+  document.querySelectorAll('.shot-img').forEach(function(b){
+    b.addEventListener('click',function(){
+      img.src=b.dataset.full; img.alt=b.dataset.cap;
+      document.getElementById('lb-t').textContent=b.dataset.prod;
+      document.getElementById('lb-c').textContent=b.dataset.cap;
+      document.getElementById('lb-d').textContent=b.dataset.detail;
+      var s=document.getElementById('lb-s'); s.href=b.dataset.src; s.textContent=b.dataset.stype;
+      if(dlg.showModal) dlg.showModal();
+    });
+  });
+  dlg.addEventListener('click',function(e){ if(e.target===dlg||e.target===img) dlg.close(); });
+})();
+</script>

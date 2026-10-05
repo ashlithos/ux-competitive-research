@@ -1,0 +1,1165 @@
+{
+ "title": "Comments at Scale",
+ "pillars": [
+  {
+   "name": "Understand",
+   "key": "u"
+  },
+  {
+   "name": "Act",
+   "key": "a"
+  },
+  {
+   "name": "Learn",
+   "key": "l"
+  }
+ ],
+ "shots": {
+  "gdocs-summary": {
+   "product": "Google Docs · Gemini",
+   "scope": "Artifact",
+   "caption": "A user asks Gemini in the side panel which issues in the comments still need resolving. The answer groups points by theme and attributes each to a reviewer by name.",
+   "detail": "Each point names the reviewer it came from and carries a numbered reference.",
+   "short": "\"Which issues still need resolving?\"",
+   "src": "https://www.androidauthority.com/gemini-google-docs-comments-3692242/",
+   "source_type": "Press screenshot · Android Authority"
+  },
+  "gdocs-ai-comments": {
+   "product": "Google Docs · Gemini",
+   "scope": "Thread",
+   "caption": "Gemini drafts a comment for the user to post (\"AI comments 1 of 2\"), shown in the normal comment rail with Cancel and Comment buttons.",
+   "detail": "AI-drafted comments are paged (\"1 of 2\") and only post when the user clicks Comment.",
+   "short": "AI drafts, you post",
+   "src": "https://www.androidauthority.com/gemini-google-docs-comments-3692242/",
+   "source_type": "Press screenshot · Android Authority"
+  },
+  "gdocs-draft-changes": {
+   "product": "Google Docs · Gemini",
+   "scope": "Artifact",
+   "caption": "Gemini rewrites a paragraph to address reviewer comments, shown as tracked changes with Accept all and Reject all.",
+   "detail": "Edits appear as tracked changes; Accept all and Reject all act on the whole set.",
+   "short": "Edits drafted from comments",
+   "src": "https://www.androidauthority.com/gemini-google-docs-comments-3692242/",
+   "source_type": "Press screenshot · Android Authority"
+  },
+  "gdocs-video": {
+   "product": "Google Docs · Gemini",
+   "scope": "Thread",
+   "caption": "From Google's launch video: Gemini replying inside open comment threads next to a chart in a Doc.",
+   "detail": "Replies are drafted inside the existing comment threads.",
+   "short": "Replies drafted in threads",
+   "src": "https://www.youtube.com/watch?v=DQ7A6PQayXA",
+   "source_type": "Video thumbnail · Google Workspace"
+  },
+  "confluence-summary": {
+   "product": "Confluence · Rovo",
+   "scope": "Artifact",
+   "caption": "The \"Comment summary\" card at the top of the comments panel. Each bullet names the commenter and ends in numbered citations that jump to the source comments.",
+   "detail": "Every bullet ends in numbered citation chips that link to the source comments.",
+   "short": "Comment summary with citation chips",
+   "src": "https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/",
+   "source_type": "Frame from Atlassian help GIF"
+  },
+  "confluence-filters": {
+   "product": "Confluence",
+   "scope": "Artifact",
+   "caption": "The comments panel filter menu: Open, Unread, Resolved, sort order, inline vs. all comments, plus \"Mark all as read\" and \"Mark all as resolved\".",
+   "detail": "Bulk actions (mark all read, mark all resolved) sit in the same menu as the filters.",
+   "short": "Filters + mark all resolved",
+   "src": "https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/",
+   "source_type": "Atlassian help screenshot"
+  },
+  "word-copilot-tabs": {
+   "product": "Word · Copilot",
+   "scope": "Artifact",
+   "caption": "The Copilot Summary at the top of a Word doc, with tabs for Summary, Insights, Activity, Discussion and Coaching, and a Brief/Standard/Detailed length control.",
+   "detail": "Comments have their own Discussion tab; summary length is adjustable.",
+   "short": "Summary tabs: Activity & Discussion",
+   "src": "https://office-watch.com/2025/copilot-word-365-document-summary-gets-better-for-some/",
+   "source_type": "Press screenshot · Office Watch"
+  },
+  "figma-agent-summary": {
+   "product": "Figma · agent",
+   "scope": "Artifact",
+   "caption": "Figma's agent answers \"Can you summarize the comments on this page?\" with 12 comments grouped into Scope Questions, Design Feedback and Pending Confirmation.",
+   "detail": "One category is a status (Pending Confirmation), not a topic.",
+   "short": "12 comments grouped by status",
+   "src": "https://www.figma.com/solutions/ai-comment-summarizer/",
+   "source_type": "Figma product page"
+  },
+  "figjam-sort": {
+   "product": "FigJam AI",
+   "scope": "Board",
+   "caption": "Sort stickies: FigJam AI copies the selected stickies and groups them by theme into new sections.",
+   "detail": "Sorting works on a copy; the original stickies stay in place.",
+   "short": "Stickies sorted into themes",
+   "src": "https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI",
+   "source_type": "Figma help screenshot"
+  },
+  "figjam-summary": {
+   "product": "FigJam AI",
+   "scope": "Board",
+   "caption": "Summarize stickies: FigJam AI creates a new summary object on the board next to the source notes.",
+   "detail": "The summary is a new object on the canvas rather than a chat reply.",
+   "short": "Summary written onto the board",
+   "src": "https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI",
+   "source_type": "Figma help screenshot"
+  },
+  "frameio-filters": {
+   "product": "Frame.io",
+   "scope": "Asset",
+   "caption": "Comment filters for annotations, attachments, completed/incomplete, unread, mentions, hashtag and person.",
+   "detail": "Hashtag and Person are filter dimensions alongside status.",
+   "short": "Filter by person, hashtag, status",
+   "src": "https://help.frame.io/en/articles/9105278-comments-panel-overview",
+   "source_type": "Frame.io help screenshot"
+  },
+  "frameio-export": {
+   "product": "Frame.io",
+   "scope": "Asset",
+   "caption": "Copy, print or export comments to editing tools (FCP, Premiere, Resolve) or CSV/TXT. The note reads: \"Only visible comments, including filtered and searched, will be copied and exported.\"",
+   "detail": "The menu states that only visible (filtered or searched) comments are copied and exported.",
+   "short": "Export only what's filtered",
+   "src": "https://help.frame.io/en/articles/9105278-comments-panel-overview",
+   "source_type": "Frame.io help screenshot"
+  },
+  "tableau-comments": {
+   "product": "Tableau",
+   "scope": "Dashboard",
+   "caption": "The comments pane on a published dashboard. A comment carries a snapshot of the filtered view it refers to.",
+   "detail": "The comment carries a snapshot of the filtered view it refers to.",
+   "short": "Comment with a view snapshot",
+   "src": "https://help.tableau.com/current/pro/desktop/en-us/comment.htm",
+   "source_type": "Tableau help screenshot"
+  },
+  "drive-catchup": {
+   "product": "Google Drive · Catch me up",
+   "scope": "Folder / Drive",
+   "caption": "Clicking \"Catch me up\" on Drive home opens a Gemini panel that summarizes what changed across files since yesterday, including decisions and open questions.",
+   "detail": "Suggested follow-up prompts appear under the summary.",
+   "short": "Catch me up across Drive",
+   "src": "https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html",
+   "source_type": "Frame from Google announcement GIF"
+  },
+  "drive-badge": {
+   "product": "Google Drive · Catch me up",
+   "scope": "File list",
+   "caption": "A sparkle badge next to a file name means it has new changes or comments since your last visit. Clicking it summarizes that file.",
+   "detail": "Unread state shows per file in the list, before opening anything.",
+   "short": "Per-file \"what's new\" badge",
+   "src": "https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html",
+   "source_type": "Google announcement GIF"
+  },
+  "productboard-spark": {
+   "product": "Productboard Spark",
+   "scope": "Workspace",
+   "caption": "A proactive Spark card: \"Spark has something for you…\" with an Opportunity theme backed by 89 notes from 12 customers.",
+   "detail": "The theme shows its evidence count: 89 notes from 12 customers.",
+   "short": "Theme backed by 89 notes",
+   "src": "https://www.productboard.com/blog/productboard-spark-ai-customer-feedback-analysis/",
+   "source_type": "Productboard blog image"
+  },
+  "github-batch": {
+   "product": "GitHub",
+   "scope": "PR",
+   "caption": "A suggested change in a review comment with \"Commit suggestion\" and \"Add suggestion to batch\".",
+   "detail": "Batched suggestions become one commit with each suggester as co-author.",
+   "short": "Add suggestion to batch",
+   "src": "https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/incorporating-feedback-in-your-pull-request",
+   "source_type": "GitHub docs screenshot"
+  },
+  "copilot-review-comment": {
+   "product": "GitHub · Copilot code review",
+   "scope": "PR",
+   "caption": "A Copilot review comment flagged High, with a suggested changeset and Apply suggestion / Add suggestion to batch.",
+   "detail": "AI comments use the same Apply / Add to batch controls as human suggestions, plus a severity tag.",
+   "short": "AI comment, same batch controls",
+   "src": "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-code-review",
+   "source_type": "GitHub docs screenshot"
+  },
+  "copilot-fix-mobile": {
+   "product": "GitHub Mobile · Copilot",
+   "scope": "PR",
+   "caption": "\"Copilot's findings\" on a PR in GitHub Mobile, with a Fix with Copilot button that hands the comments to the cloud agent.",
+   "detail": "The Fix with Copilot button sits directly under the findings summary.",
+   "short": "Fix with Copilot, on mobile",
+   "src": "https://github.blog/changelog/2026-07-17-github-mobile-fix-pull-request-comments-with-copilot-cloud-agent/",
+   "source_type": "GitHub changelog image"
+  },
+  "bugbot-autofix": {
+   "product": "Cursor · Bugbot Autofix",
+   "scope": "PR",
+   "caption": "Bugbot reports it found an issue and that Autofix already prepared a fix, with Create PR, a push command and a preview.",
+   "detail": "The fix exists before anyone asks; the person chooses Create PR or push.",
+   "short": "Fix ready before you ask",
+   "src": "https://cursor.com/docs/bugbot",
+   "source_type": "Cursor docs screenshot"
+  },
+  "vercel-cli": {
+   "product": "Vercel · comments CLI",
+   "scope": "Branch",
+   "caption": "\"vercel comments\" lists unresolved preview comments for the branch; \"inspect\" shows the thread with the exact DOM element it was pinned to.",
+   "detail": "Output includes the DOM element each comment was pinned to.",
+   "short": "Comments as CLI and JSON",
+   "src": "https://vercel.com/changelog/manage-vercel-toolbar-comments-from-the-cli",
+   "source_type": "Vercel changelog image"
+  },
+  "linear-inbox": {
+   "product": "Linear · Triage",
+   "scope": "Team inbox",
+   "caption": "The Triage inbox, where unplanned work from Intercom, Sentry and people lands in one queue.",
+   "detail": "Items from Intercom, Sentry and people share one queue.",
+   "short": "One triage inbox",
+   "src": "https://linear.app/docs/triage",
+   "source_type": "Linear docs screenshot"
+  },
+  "linear-triage-intel": {
+   "product": "Linear · Triage Intelligence",
+   "scope": "Team inbox",
+   "caption": "Suggestions for assignee, project and label, plus \"Duplicate of\" and \"Related to\" links.",
+   "detail": "Suggestions sit in their own module, apart from fields set by people.",
+   "short": "AI suggestions in their own module",
+   "src": "https://linear.app/now/cx-in-linear",
+   "source_type": "Linear blog screenshot"
+  },
+  "linear-guidance": {
+   "product": "Linear · Triage Intelligence",
+   "scope": "Workspace",
+   "caption": "\"Additional guidance\": plain-language rules that steer triage suggestions, e.g. \"All billing-related issues should use the Stripe label.\"",
+   "detail": "Guidance is plain-language text at the workspace level.",
+   "short": "Workspace guidance, plain words",
+   "src": "https://linear.app/now/how-we-built-triage-intelligence",
+   "source_type": "Linear blog screenshot"
+  },
+  "linear-rule": {
+   "product": "Linear · Triage rules",
+   "scope": "Team",
+   "caption": "A deterministic rule that runs after the AI: When customer tier includes Enterprise, set priority to Urgent.",
+   "detail": "Rules run after Triage Intelligence has made its suggestions.",
+   "short": "Rule runs after the AI",
+   "src": "https://linear.app/now/cx-in-linear",
+   "source_type": "Linear blog screenshot"
+  },
+  "coderabbit-learning": {
+   "product": "CodeRabbit · Learnings",
+   "scope": "Thread → Repo",
+   "caption": "A maintainer corrects CodeRabbit in a PR thread. CodeRabbit replies and adds a Learning, recording who it learned from, the PR, file, timestamp and the rule.",
+   "detail": "Each learning records who it came from, the PR, file and lines, and when.",
+   "short": "Learning created from a reply",
+   "src": "https://docs.coderabbit.ai/knowledge-base/learnings",
+   "source_type": "CodeRabbit docs screenshot"
+  },
+  "coderabbit-dashboard": {
+   "product": "CodeRabbit · Learnings",
+   "scope": "Org",
+   "caption": "The Learnings dashboard: totals, active in 30 days, never used, with usage counts and last-used dates per learning, plus CSV export.",
+   "detail": "Each learning shows a usage count and last-used date; the header counts \"never used\".",
+   "short": "Learnings with usage counts",
+   "src": "https://docs.coderabbit.ai/knowledge-base/learnings",
+   "source_type": "CodeRabbit docs screenshot"
+  },
+  "bugbot-rule": {
+   "product": "Cursor · Bugbot learned rules",
+   "scope": "Repo",
+   "caption": "A learned rule (\"New Datadog service monitors must be owned by the service team\"), tagged Learned Rule, with an Enabled toggle and editable content.",
+   "detail": "Rules are tagged Learned Rule, have an Enabled toggle and editable text.",
+   "short": "Editable learned rule",
+   "src": "https://cursor.com/changelog/04-08-26",
+   "source_type": "Cursor changelog image"
+  },
+  "bugbot-loop": {
+   "product": "Cursor · Bugbot",
+   "scope": "Repo / Team",
+   "caption": "Bugbot's learning loop: emoji reactions, replies and PR comments feed candidate rules that get created, promoted or disabled across repo and team scopes.",
+   "detail": "Inputs include emoji reactions, replies and PR comments.",
+   "short": "Reactions become candidate rules",
+   "src": "https://cursor.com/blog/bugbot-learning",
+   "source_type": "Cursor blog diagram"
+  },
+  "bugbot-chart": {
+   "product": "Cursor · Bugbot",
+   "scope": "Outcome",
+   "caption": "Cursor's chart of resolution rate (share of flagged bugs fixed by merge) climbing from Aug 2025 to Apr 2026 while bugs found per run also went up. Cursor reports 52% at launch and 78% now.",
+   "detail": "Cursor uses resolution rate as the outcome metric for learning.",
+   "short": "Resolution rate 52% → 78%",
+   "src": "https://cursor.com/blog/bugbot-learning",
+   "source_type": "Cursor blog chart"
+  },
+  "genie-monitor": {
+   "product": "Databricks Genie · Monitor",
+   "scope": "Space",
+   "caption": "The Monitor tab: every question with its rating, review request, comment and user, filterable by time, conversation type, rating and status.",
+   "detail": "Ratings, review requests and comments are columns in one filterable table.",
+   "short": "Every question, rating, comment",
+   "src": "https://docs.databricks.com/aws/en/genie-agents/monitor",
+   "source_type": "Databricks docs screenshot"
+  },
+  "genie-digest": {
+   "product": "Databricks Genie · Weekly digest",
+   "scope": "Space",
+   "caption": "Weekly digest of questions, users, thumbs up and down, with the Analyze Space Usage button that launches an agent review.",
+   "detail": "\"Analyze Space Usage\" launches an agent review of the week.",
+   "short": "Weekly digest + Analyze",
+   "src": "https://docs.databricks.com/aws/en/genie-agents/monitor",
+   "source_type": "Databricks docs screenshot"
+  },
+  "genie-benchmarks": {
+   "product": "Databricks Genie · Benchmarks",
+   "scope": "Space",
+   "caption": "Benchmark runs with accuracy per run, and a \"Manual review needed\" status where no ground-truth SQL exists.",
+   "detail": "Runs without ground-truth SQL are marked \"Manual review needed\".",
+   "short": "Benchmark runs",
+   "src": "https://docs.databricks.com/aws/en/genie-agents/monitor",
+   "source_type": "Databricks docs screenshot"
+  },
+  "genie-eval": {
+   "product": "Databricks Genie · Benchmarks",
+   "scope": "Question",
+   "caption": "One benchmark result: model SQL next to ground-truth SQL, an assessment of Good, and Update ground truth.",
+   "detail": "Model SQL and ground-truth SQL are shown side by side.",
+   "short": "Model vs. ground-truth SQL",
+   "src": "https://docs.databricks.com/aws/en/genie-agents/monitor",
+   "source_type": "Databricks docs screenshot"
+  },
+  "hex-dashboard": {
+   "product": "Hex · Context Studio",
+   "scope": "Workspace",
+   "caption": "Context Studio overview: conversations, users and warnings over time, top conversation topics, and a table of threads with flags like Missing context and User doubt.",
+   "detail": "Warnings are charted against conversation topics.",
+   "short": "Usage, topics, warnings",
+   "src": "https://learn.hex.tech/docs/agent-management/observability",
+   "source_type": "Hex docs screenshot"
+  },
+  "hex-topics": {
+   "product": "Hex · Context Studio",
+   "scope": "Workspace",
+   "caption": "Threads listed with user, role, prompt and an AI-extracted topic.",
+   "detail": "Each thread gets an AI-extracted topic.",
+   "short": "Threads tagged by topic",
+   "src": "https://learn.hex.tech/docs/agent-management/observability",
+   "source_type": "Hex docs screenshot"
+  },
+  "hex-inspector": {
+   "product": "Hex · Thread Inspector",
+   "scope": "Thread",
+   "caption": "The read-only Thread Inspector: the agent's reasoning and table, plus a summary panel of what happened.",
+   "detail": "The inspector is read-only for admins.",
+   "short": "Read-only thread inspector",
+   "src": "https://learn.hex.tech/docs/agent-management/observability",
+   "source_type": "Hex docs screenshot"
+  },
+  "hex-warning": {
+   "product": "Hex · Warnings",
+   "scope": "Thread",
+   "caption": "A User doubt warning (\"User pushed back on how the agent segmented customers…\") with \"Fix with Suggestion: Clarify customer sector segments\".",
+   "detail": "The warning links straight to a suggested fix.",
+   "short": "Warning → suggested fix",
+   "src": "https://hex.tech/blog/introducing-context-suggestions/",
+   "source_type": "Hex blog image"
+  },
+  "hex-suggestions": {
+   "product": "Hex · Context Suggestions",
+   "scope": "Workspace",
+   "caption": "The Suggestions feed in Context Studio: drafted context changes such as Define B2B account reporting rules and Clarify fiscal calendar conventions, each with an evidence count.",
+   "detail": "Suggestions are listed as rows with a status (Open) and age.",
+   "short": "Suggestion feed",
+   "src": "https://hex.tech/blog/introducing-context-suggestions/",
+   "source_type": "Frame from Hex blog video"
+  },
+  "hex-diff": {
+   "product": "Hex · Context Suggestions",
+   "scope": "Guide file",
+   "caption": "An accepted suggestion shown as a diff to a workspace guide (fiscal year logic), with Reject and Publish per file.",
+   "detail": "Each changed guide file has its own Reject and Publish.",
+   "short": "Context change as a diff",
+   "src": "https://hex.tech/blog/introducing-context-suggestions/",
+   "source_type": "Frame from Hex blog video"
+  },
+  "hex-preview": {
+   "product": "Hex · Publishing",
+   "scope": "Workspace",
+   "caption": "Before publishing, a Thread Preview runs a test question (\"When does our fiscal calendar start?\") against the staged changes.",
+   "detail": "A test question runs against staged changes before publishing.",
+   "short": "Test before publish",
+   "src": "https://hex.tech/blog/introducing-context-studio/",
+   "source_type": "Frame from Hex blog video"
+  },
+  "hex-loop": {
+   "product": "Hex · architecture",
+   "scope": "System",
+   "caption": "Hex's diagram: threads, notebooks, Slack/MCP feed Context Studio, where a Review Agent produces suggestions that update workspace context.",
+   "detail": "A Review Agent sits between thread observability and context updates.",
+   "short": "The Review Agent loop",
+   "src": "https://hex.tech/blog/introducing-context-suggestions/",
+   "source_type": "Hex blog diagram"
+  },
+  "spotter-review-terms": {
+   "product": "ThoughtSpot · Coach Spotter",
+   "scope": "Model",
+   "caption": "Review business terms: each phrase in a question is mapped to search tokens, with approve and reject controls per mapping.",
+   "detail": "Each phrase-to-token mapping is approved or rejected on its own.",
+   "short": "Approve each term mapping",
+   "src": "https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps",
+   "source_type": "ThoughtSpot docs screenshot"
+  },
+  "spotter-fix-term": {
+   "product": "ThoughtSpot · Coach Spotter",
+   "scope": "Model",
+   "caption": "Fix business term: \"revenue\" mapped to Amount booked in the Salesforce model.",
+   "detail": "The correction is saved as a business term in the model.",
+   "short": "Correction saved as a term",
+   "src": "https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps",
+   "source_type": "ThoughtSpot docs screenshot"
+  },
+  "langsmith-bulk": {
+   "product": "LangSmith",
+   "scope": "Project",
+   "caption": "Select threads in bulk and add them to an annotation queue from the bottom action bar.",
+   "detail": "The selection in the threads table becomes the queue batch.",
+   "short": "Bulk add threads to a queue",
+   "src": "https://docs.langchain.com/langsmith/annotation-queues",
+   "source_type": "LangChain docs screenshot"
+  },
+  "langsmith-queue": {
+   "product": "LangSmith · Annotation queue",
+   "scope": "Queue",
+   "caption": "The queue reviewer: item list with Needs Review / Needs Others' Review / Completed, the transcript, and a rubric feedback pane.",
+   "detail": "Each item has a review status, including \"Needs Others' Review\".",
+   "short": "Rubric review queue",
+   "src": "https://docs.langchain.com/langsmith/annotation-queues",
+   "source_type": "LangChain docs screenshot"
+  },
+  "langsmith-pairwise": {
+   "product": "LangSmith · Pairwise queue",
+   "scope": "Queue",
+   "caption": "Two runs side by side with A / B / Equal buttons and keyboard shortcuts.",
+   "detail": "Reviewers choose A, B or Equal, with keyboard shortcuts.",
+   "short": "A / B / Equal review",
+   "src": "https://docs.langchain.com/langsmith/annotation-queues",
+   "source_type": "LangChain docs screenshot"
+  },
+  "mlflow-session": {
+   "product": "MLflow · Labeling session",
+   "scope": "Experiment",
+   "caption": "Create Labeling Session: pick a dataset, choose label schemas, and preview the questions experts will answer.",
+   "detail": "Label schemas define the questions reviewers answer.",
+   "short": "Labeling session setup",
+   "src": "https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions",
+   "source_type": "Databricks docs screenshot"
+  },
+  "mlflow-assess": {
+   "product": "MLflow · Assessments",
+   "scope": "Trace",
+   "caption": "A trace with expert assessments: a No rating with written rationale, and an expected summary as ground truth.",
+   "detail": "A written rationale is stored next to the rating.",
+   "short": "Rating + written rationale",
+   "src": "https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions",
+   "source_type": "Databricks docs screenshot"
+  }
+ },
+ "coverage": [
+  {
+   "group": "Docs & design",
+   "rows": [
+    {
+     "product": "Google Docs & Drive · Gemini",
+     "cells": [
+      [
+       "f",
+       "Summaries, Q&A on comments, Catch me up across files"
+      ],
+      [
+       "f",
+       "Drafts replies, comments and edits"
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    },
+    {
+     "product": "Confluence · Rovo",
+     "cells": [
+      [
+       "f",
+       "Auto-summary of unresolved comments"
+      ],
+      [
+       "h",
+       "Mark all read / resolved (no AI)"
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    },
+    {
+     "product": "Word · Copilot",
+     "cells": [
+      [
+       "f",
+       "Summary with Activity and Discussion tabs"
+      ],
+      [
+       "f",
+       "Adds, reads, replies to and manages comment threads"
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    },
+    {
+     "product": "Figma & FigJam",
+     "cells": [
+      [
+       "f",
+       "Agent summarizes comments; FigJam sorts stickies"
+      ],
+      [
+       "n",
+       ""
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    },
+    {
+     "product": "Frame.io",
+     "cells": [
+      [
+       "h",
+       "Filters by person, hashtag, status"
+      ],
+      [
+       "h",
+       "Export / copy filtered comments (no AI)"
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    },
+    {
+     "product": "Tableau · Power BI",
+     "cells": [
+      [
+       "h",
+       "Comments pane with snapshots (Tableau)"
+      ],
+      [
+       "n",
+       ""
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "group": "Code review",
+   "rows": [
+    {
+     "product": "GitHub · Copilot",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Batch suggestions; Fix with Copilot"
+      ],
+      [
+       "h",
+       "Custom instructions written by people"
+      ]
+     ]
+    },
+    {
+     "product": "Cursor Bugbot",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Autofix and Fix All"
+      ],
+      [
+       "f",
+       "Learned rules from reactions and replies"
+      ]
+     ]
+    },
+    {
+     "product": "CodeRabbit",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Resolve all comments by command"
+      ],
+      [
+       "f",
+       "Learnings scoped to repo or org"
+      ]
+     ]
+    },
+    {
+     "product": "Vercel",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "h",
+       "CLI to list, reply, resolve; agents do the rest"
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "group": "Product ops",
+   "rows": [
+    {
+     "product": "Linear",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Triage Intelligence routing and duplicates"
+      ],
+      [
+       "h",
+       "Workspace guidance written by people"
+      ]
+     ]
+    },
+    {
+     "product": "Notion",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Agents triggered by new comments"
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    },
+    {
+     "product": "Productboard",
+     "cells": [
+      [
+       "f",
+       "Spark themes with evidence counts"
+      ],
+      [
+       "n",
+       ""
+      ],
+      [
+       "n",
+       ""
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "group": "Data & analytics",
+   "rows": [
+    {
+     "product": "Hex",
+     "cells": [
+      [
+       "f",
+       "Topics and warnings across threads"
+      ],
+      [
+       "h",
+       "Tag the data team into a thread"
+      ],
+      [
+       "f",
+       "Review Agent drafts context changes"
+      ]
+     ]
+    },
+    {
+     "product": "Databricks Genie",
+     "cells": [
+      [
+       "f",
+       "Monitor tab, Analyze Space Usage"
+      ],
+      [
+       "h",
+       "Respond to review requests"
+      ],
+      [
+       "f",
+       "Suggested improvements; benchmarks"
+      ]
+     ]
+    },
+    {
+     "product": "Snowflake Cortex",
+     "cells": [
+      [
+       "h",
+       "Groups unanswered questions"
+      ],
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Verified-query suggestions"
+      ]
+     ]
+    },
+    {
+     "product": "ThoughtSpot",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "h",
+       "Admins review downvote comments"
+      ],
+      [
+       "f",
+       "Coaching: references and business terms"
+      ]
+     ]
+    },
+    {
+     "product": "Looker",
+     "cells": [
+      [
+       "h",
+       "Trace and feedback review"
+      ],
+      [
+       "n",
+       ""
+      ],
+      [
+       "h",
+       "Instructions and golden queries, written by people"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "group": "Agent evaluation",
+   "rows": [
+    {
+     "product": "LangSmith",
+     "cells": [
+      [
+       "h",
+       "Filter traces by feedback"
+      ],
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Rubric queues to datasets"
+      ]
+     ]
+    },
+    {
+     "product": "MLflow",
+     "cells": [
+      [
+       "n",
+       ""
+      ],
+      [
+       "n",
+       ""
+      ],
+      [
+       "f",
+       "Expert labeling sessions"
+      ]
+     ]
+    }
+   ]
+  }
+ ],
+ "heat": {
+  "rows": [
+   [
+    "Thread",
+    "one conversation"
+   ],
+   [
+    "Artifact",
+    "doc, PR, page"
+   ],
+   [
+    "Folder",
+    "repo, space"
+   ],
+   [
+    "Workspace",
+    "team, org"
+   ]
+  ],
+  "cells": {
+   "Thread": [
+    [
+     "Gemini in Docs",
+     "Rovo in Jira",
+     "Copilot in Word"
+    ],
+    [
+     "Gemini draft reply",
+     "Fix with Copilot",
+     "@copilot"
+    ],
+    [
+     "@cursor remember",
+     "CodeRabbit chat"
+    ]
+   ],
+   "Artifact": [
+    [
+     "Confluence summary",
+     "Figma agent",
+     "Word Activity tab",
+     "Tableau comments"
+    ],
+    [
+     "GitHub batch",
+     "Bugbot Fix All",
+     "CodeRabbit resolve",
+     "vercel comments",
+     "Frame.io filters"
+    ],
+    []
+   ],
+   "Folder": [
+    [
+     "Drive Catch me up",
+     "Genie Monitor",
+     "Hex Context Studio"
+    ],
+    [
+     "Notion agent triggers",
+     "Linear triage rules"
+    ],
+    [
+     "Bugbot learned rules",
+     "CodeRabbit repo learnings",
+     "Genie instructions",
+     "Snowflake verified queries"
+    ]
+   ],
+   "Workspace": [
+    [
+     "Productboard Spark",
+     "Dovetail",
+     "Hex topics"
+    ],
+    [
+     "Linear Triage Intelligence"
+    ],
+    [
+     "CodeRabbit org learnings",
+     "Linear guidance",
+     "LangSmith feedback configs",
+     "ThoughtSpot coaching"
+    ]
+   ]
+  }
+ },
+ "loop": {
+  "steps": [
+   [
+    "Capture",
+    "u"
+   ],
+   [
+    "Cluster",
+    "u"
+   ],
+   [
+    "Decide",
+    "a"
+   ],
+   [
+    "Apply",
+    "l"
+   ],
+   [
+    "Verify",
+    "l"
+   ],
+   [
+    "Retire",
+    "l"
+   ]
+  ],
+  "rows": [
+   {
+    "name": "Hex",
+    "ref": false,
+    "cells": [
+     [
+      "f",
+      "Every Thread, Slack, MCP and notebook session"
+     ],
+     [
+      "f",
+      "Topics and Review Agent problem statements"
+     ],
+     [
+      "f",
+      "Data team accepts or rejects suggestions"
+     ],
+     [
+      "f",
+      "Publishes guides, endorsements, models"
+     ],
+     [
+      "f",
+      "Thread Preview before publishing"
+     ],
+     [
+      "n",
+      ""
+     ]
+    ]
+   },
+   {
+    "name": "Databricks Genie",
+    "ref": false,
+    "cells": [
+     [
+      "f",
+      "Questions, ratings, review requests"
+     ],
+     [
+      "f",
+      "Analyze Space Usage summarizes 7 days"
+     ],
+     [
+      "f",
+      "Managers edit instructions"
+     ],
+     [
+      "f",
+      "Instructions, example SQL"
+     ],
+     [
+      "f",
+      "Up to 500 benchmark questions"
+     ],
+     [
+      "n",
+      ""
+     ]
+    ]
+   },
+   {
+    "name": "Snowflake Cortex",
+    "ref": false,
+    "cells": [
+     [
+      "f",
+      "Usage data and query history"
+     ],
+     [
+      "f",
+      "Groups similar unanswered questions"
+     ],
+     [
+      "f",
+      "Human review required"
+     ],
+     [
+      "f",
+      "Verified query repository"
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "n",
+      ""
+     ]
+    ]
+   },
+   {
+    "name": "ThoughtSpot",
+    "ref": false,
+    "cells": [
+     [
+      "f",
+      "Add to Coaching from an answer"
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "f",
+      "Approve term mappings"
+     ],
+     [
+      "f",
+      "Reference questions, business terms"
+     ],
+     [
+      "h",
+      "Docs recommend validating with test questions"
+     ],
+     [
+      "n",
+      ""
+     ]
+    ]
+   },
+   {
+    "name": "Looker",
+    "ref": false,
+    "cells": [
+     [
+      "h",
+      "Agent traces and feedback"
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "f",
+      "Admins edit"
+     ],
+     [
+      "h",
+      "Instructions and golden queries, by hand"
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "n",
+      ""
+     ]
+    ]
+   },
+   {
+    "name": "Tableau · Power BI",
+    "ref": false,
+    "cells": [
+     [
+      "h",
+      "Dashboard comments pane"
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "n",
+      ""
+     ],
+     [
+      "n",
+      ""
+     ]
+    ]
+   },
+   {
+    "name": "Cursor Bugbot (code)",
+    "ref": true,
+    "cells": [
+     [
+      "f",
+      "Reactions, replies, reviewer comments"
+     ],
+     [
+      "f",
+      "Candidate rules"
+     ],
+     [
+      "h",
+      "Auto-promotes on signal; editable"
+     ],
+     [
+      "f",
+      "Learned rules"
+     ],
+     [
+      "f",
+      "Rules evaluated against incoming PRs"
+     ],
+     [
+      "f",
+      "Auto-disables rules that stop helping"
+     ]
+    ]
+   }
+  ]
+ },
+ "sketches": [
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of a digest above a comment panel\">\n        <div class=\"sk-bar\"><span>Comments · 23 open</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"ai-box\">\n            <div class=\"row\"><span class=\"lab\">Summary of 23 unresolved</span><span class=\"pill\">updated 4m ago ↻</span></div>\n            <div><b>Scope (6)</b> · Two reviewers question whether export belongs in v1 <span class=\"pill\">3 people</span></div>\n            <div><b>Copy (9)</b> · Empty-state wording flagged on 4 frames <span class=\"pill\">5 people</span></div>\n            <div><b>Blocked (2)</b> · Waiting on legal for consent text <span class=\"pill w\">needs owner</span></div>\n            <div class=\"btnrow\"><span class=\"sbtn\">Jump to sources</span><span class=\"sbtn\">By person</span><span class=\"sbtn ai\">Draft replies</span></div>\n          </div>\n          <div class=\"cmt\"><div class=\"av\">MR</div><div class=\"t\"><div class=\"n\">Maya R. · Frame 4</div>Should export be in v1 at all?</div></div>\n          <div class=\"cmt\"><div class=\"av\">JT</div><div class=\"t\"><div class=\"n\">Jon T. · Frame 7</div>\"Nothing here yet\" feels cold.</div></div>\n        </div>\n        <div class=\"sk-cap\">My sketch · counts show frequency, links keep it verifiable</div>\n      </div>",
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of a scoped comment query\">\n        <div class=\"sk-bar\"><span>Ask about feedback</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"input\"><span class=\"scopechip\">Folder: Q3 dashboards</span><span class=\"scopechip\">Unresolved</span><span>What are reviewers disputing?</span></div>\n          <div class=\"ai-box\">\n            <div class=\"row\"><span class=\"lab\">Answer</span><span class=\"pill\">read 14 of 16 files · 2 no access</span></div>\n            <div>Most disputes are about <b>active user</b>: 3 dashboards count test accounts, 2 don't.</div>\n            <div class=\"btnrow\"><span class=\"sbtn\">Show 11 comments</span><span class=\"sbtn ai\">Propose a definition</span></div>\n          </div>\n        </div>\n        <div class=\"sk-cap\">My sketch · scope chips and a coverage count make the answer checkable</div>\n      </div>",
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of delegating a comment to an agent\">\n        <div class=\"sk-bar\"><span>Review thread · line 42</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"cmt\"><div class=\"av\">PK</div><div class=\"t\"><div class=\"n\">Priya K.</div>Retry loop needs a backoff cap.</div></div>\n          <div class=\"btnrow\"><span class=\"sbtn\">Reply</span><span class=\"sbtn\">Resolve</span><span class=\"sbtn ai\">Hand to agent</span></div>\n          <div class=\"ai-box\">\n            <div class=\"lab\">Agent · working</div>\n            <div>Added max delay of 30s and a test. Pushed 1 commit.</div>\n            <div class=\"btnrow\"><span class=\"sbtn\">View diff</span><span class=\"sbtn primary\">Accept &amp; resolve</span></div>\n          </div>\n        </div>\n        <div class=\"sk-cap\">My sketch · the agent reports in the thread it was given</div>\n      </div>",
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of a batch apply tray\">\n        <div class=\"sk-bar\"><span>Suggestions · 7</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"row\"><span class=\"scopechip\">Filter: copy · unresolved</span><span class=\"pill\">4 selected</span></div>\n          <div class=\"check\"><span class=\"box on\"></span><div>Rename \"Submit\" to \"Save draft\" <span class=\"pill\">Ana</span></div></div>\n          <div class=\"check\"><span class=\"box on\"></span><div>Shorten error message <span class=\"pill\">Leo</span></div></div>\n          <div class=\"check\"><span class=\"box on\"></span><div>Sentence case on tabs <span class=\"pill\">Ana</span></div></div>\n          <div class=\"check\"><span class=\"box\"></span><div>Rethink onboarding flow <span class=\"pill w\">too broad</span></div></div>\n          <div class=\"btnrow\"><span class=\"sbtn\">Preview combined change</span><span class=\"sbtn primary\">Apply 4 as one change</span></div>\n        </div>\n        <div class=\"sk-cap\">My sketch · the filter defines the batch; broad items are flagged, not applied</div>\n      </div>",
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of a triage inbox with AI suggestions\">\n        <div class=\"sk-bar\"><span>Feedback inbox · 38</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"check\" style=\"flex-direction:column;gap:6px\">\n            <div><b>\"Revenue tile doesn't match finance\"</b> · from Slack</div>\n            <div class=\"btnrow\"><span class=\"human\">Data Platform</span><span class=\"sug\">+ label: metric-definition</span><span class=\"sug\">+ owner: Lena</span><span class=\"sug\">possible duplicate of #212</span></div>\n            <div class=\"muted\" style=\"font-size:.74rem\">Why: 3 similar reports this month mention the same tile.</div>\n          </div>\n          <div class=\"btnrow\"><span class=\"sbtn\">Accept all</span><span class=\"sbtn\">Mark duplicate</span><span class=\"sbtn\">Decline</span></div>\n        </div>\n        <div class=\"sk-cap\">My sketch · solid = set by a person, dashed = AI suggestion</div>\n      </div>",
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of promoting a comment into a rule\">\n        <div class=\"sk-bar\"><span>Candidate rule</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"ai-box\">\n            <div class=\"lab\">Learned from 6 comments · 3 reviewers</div>\n            <div><b>Prefer early returns over nested try/catch in API handlers.</b></div>\n            <div class=\"row\"><span class=\"scope-pick\"><span>This repo</span><span class=\"on\">All API repos</span><span>Org</span></span><span class=\"pill ok\">helped 9 of 11 times</span></div>\n          </div>\n          <div class=\"cmt\"><div class=\"av\">DS</div><div class=\"t\"><div class=\"n\">Dev S. · PR #812</div>We do early returns here, not try/catch.</div></div>\n          <div class=\"btnrow\"><span class=\"sbtn\">See evidence</span><span class=\"sbtn\">Edit wording</span><span class=\"sbtn primary\">Promote</span><span class=\"sbtn\">Dismiss</span></div>\n        </div>\n        <div class=\"sk-cap\">My sketch · evidence, scope and track record next to the decision</div>\n      </div>",
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of a review-agent suggestion feed\">\n        <div class=\"sk-bar\"><span>Context suggestions · 5 new</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"ai-box\">\n            <div class=\"row\"><span class=\"lab\">Problem · seen in 14 threads</span><span class=\"pill w\">high impact</span></div>\n            <div>\"Churn\" is computed three ways; answers disagree for the same quarter.</div>\n            <div class=\"diff\"><div class=\"minus\">- churn: not defined</div><div class=\"plus\">+ churn = accounts lost ÷ accounts at period start; exclude trials</div></div>\n            <div class=\"btnrow\"><span class=\"sbtn\">Open 14 threads</span><span class=\"sbtn\">Test on 20 past questions</span><span class=\"sbtn primary\">Apply</span></div>\n          </div>\n          <div class=\"row\"><span>Missing join: orders ↔ refunds</span><span class=\"pill\">6 threads</span></div>\n          <div class=\"row\"><span>Fiscal year starts Feb 1</span><span class=\"pill\">4 threads</span></div>\n        </div>\n        <div class=\"sk-cap\">My sketch · problem, evidence, proposed diff, a test before apply</div>\n      </div>",
+  "<div class=\"sketch\" aria-label=\"Illustrative sketch of a rubric review queue\">\n        <div class=\"sk-bar\"><span>Review queue · Finance agent</span><span class=\"dots\"><i></i><i></i><i></i></span></div>\n        <div class=\"sk-body\">\n          <div class=\"split\">\n            <div class=\"qlist\">\n              <div class=\"cur\"><span>#41</span><span class=\"pill w\">review</span></div>\n              <div><span>#42</span><span class=\"pill w\">review</span></div>\n              <div><span>#39</span><span class=\"pill\">2nd review</span></div>\n              <div><span>#38</span><span class=\"pill ok\">done</span></div>\n            </div>\n            <div style=\"display:flex;flex-direction:column;gap:8px;min-width:0\">\n              <div><b>Q:</b> Q3 gross margin by region?</div>\n              <div class=\"row\"><span>Correct metric</span><span class=\"btnrow\"><span class=\"sbtn\">Yes</span><span class=\"sbtn primary\">No</span></span></div>\n              <div class=\"row\"><span>Right filters</span><span class=\"btnrow\"><span class=\"sbtn primary\">Yes</span><span class=\"sbtn\">No</span></span></div>\n              <div class=\"input\" style=\"font-size:.74rem\">Comment: used net revenue, not gross</div>\n              <div class=\"btnrow\"><span class=\"sbtn\">Add to eval set</span><span class=\"sbtn primary\">Submit · next</span></div>\n            </div>\n          </div>\n        </div>\n        <div class=\"sk-cap\">My sketch · a rubric makes judgments countable; free text still allowed</div>\n      </div>"
+ ],
+ "sources_html": "<div class=\"sources\">\n      <h4>Problem evidence</h4>\n      <ul>\n        <li><a href=\"https://www.faros.ai/blog/ai-software-engineering\">Faros AI · AI Productivity Paradox Report 2025</a></li>\n        <li><a href=\"https://www.faros.ai/blog/ai-code-quality-senior-engineer-review-burden\">Faros AI · AI Engineering Report 2026</a></li>\n        <li><a href=\"https://forum.figma.com/suggest-a-feature-11/summary-of-comments-in-a-file-36409\">Figma forum · Summary of comments (2024)</a></li>\n        <li><a href=\"https://forum.figma.com/suggest-a-feature-11/summarise-all-comments-into-next-steps-with-figma-ai-36882\">Figma forum · Comments into next steps (2025)</a></li>\n        <li><a href=\"https://forum.figma.com/share-your-feedback-26/summarize-ai-beta-feature-doesn-t-take-into-account-frequency-of-mentions-36939\">Figma forum · Summarize ignores frequency</a></li>\n        <li><a href=\"https://community.vercel.com/t/sync-vercel-preview-deployment-comments-to-github-pr-for-ai-agent-feedback-loops/31663\">Vercel community · Preview comments for agents</a></li>\n        <li><a href=\"https://windowsnews.ai/article/google-docs-just-let-gemini-read-your-comments-for-youheres-how-to-opt-out.440890\">Windows News · Gemini comment privacy</a></li>\n        <li><a href=\"https://learn.microsoft.com/en-us/answers/questions/5723312/turn-off-copilot-summary-in-word-documents\">Microsoft Q&amp;A · Turn off Copilot summary</a></li>\n      </ul>\n      <h4>Understand</h4>\n      <ul>\n        <li><a href=\"https://workspaceupdates.googleblog.com/2026/07/streamline-collaboration-in-google-docs-with-Gemini-powered-comment-workflows.html\">Google · Gemini comment workflows in Docs</a></li>\n        <li><a href=\"https://www.androidauthority.com/gemini-google-docs-comments-3692242/\">Android Authority · Gemini comments (screenshots)</a></li>\n        <li><a href=\"https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html\">Google · Catch me up in Drive</a></li>\n        <li><a href=\"https://support.atlassian.com/confluence-cloud/docs/summarize-comments-using-atlassian-intelligence/\">Atlassian · Summarize comments using Rovo</a></li>\n        <li><a href=\"https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/\">Atlassian · Comments panel</a></li>\n        <li><a href=\"https://office-watch.com/2025/copilot-word-365-document-summary-gets-better-for-some/\">Office Watch · Word Copilot summary tabs</a></li>\n        <li><a href=\"https://www.figma.com/solutions/ai-comment-summarizer/\">Figma · AI comment summarizer</a></li>\n        <li><a href=\"https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI\">Figma Help · Sort and summarize stickies</a></li>\n        <li><a href=\"https://www.productboard.com/blog/productboard-spark-ai-customer-feedback-analysis/\">Productboard · Spark feedback analysis</a></li>\n        <li><a href=\"https://help.tableau.com/current/pro/desktop/en-us/comment.htm\">Tableau Help · Comment on views</a></li>\n      </ul>\n      <h4>Act</h4>\n      <ul>\n        <li><a href=\"https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/incorporating-feedback-in-your-pull-request\">GitHub · Batch suggestions</a></li>\n        <li><a href=\"https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-code-review\">GitHub · Copilot code review</a></li>\n        <li><a href=\"https://techcommunity.microsoft.com/blog/microsoft365copilotblog/copilot-in-word-new-capabilities-for-document-workflows/4508974\">Microsoft · Copilot in Word comment workflows</a></li>\n        <li><a href=\"https://github.blog/changelog/2026-07-17-github-mobile-fix-pull-request-comments-with-copilot-cloud-agent/\">GitHub changelog · Fix with Copilot on mobile</a></li>\n        <li><a href=\"https://zenn.dev/yuma_prog/articles/ghcp-reviewfix-by-agent?locale=en\">Zenn · Copilot agent fixing review comments</a></li>\n        <li><a href=\"https://cursor.com/docs/bugbot\">Cursor · Bugbot docs</a></li>\n        <li><a href=\"https://vercel.com/changelog/manage-vercel-toolbar-comments-from-the-cli\">Vercel · Comments from the CLI</a></li>\n        <li><a href=\"https://help.frame.io/en/articles/9105278-comments-panel-overview\">Frame.io · Comments panel</a></li>\n        <li><a href=\"https://linear.app/now/how-we-built-triage-intelligence\">Linear · How we built Triage Intelligence</a></li>\n        <li><a href=\"https://linear.app/now/cx-in-linear\">Linear · CX team workflow</a></li>\n        <li><a href=\"https://linear.app/docs/triage\">Linear · Triage docs</a></li>\n        <li><a href=\"https://www.notion.com/help/custom-agents\">Notion · Custom Agents</a></li>\n      </ul>\n      <h4>Learn</h4>\n      <ul>\n        <li><a href=\"https://docs.coderabbit.ai/knowledge-base/learnings\">CodeRabbit · Learnings</a></li>\n        <li><a href=\"https://www.coderabbit.ai/blog/context-behind-code-review-comments\">CodeRabbit · Context behind review comments</a></li>\n        <li><a href=\"https://cursor.com/blog/bugbot-learning\">Cursor · Bugbot learned rules</a></li>\n        <li><a href=\"https://cursor.com/changelog/04-08-26\">Cursor · Changelog Apr 8, 2026</a></li>\n        <li><a href=\"https://hex.tech/blog/introducing-context-suggestions/\">Hex · Context Suggestions</a></li>\n        <li><a href=\"https://hex.tech/blog/introducing-context-studio/\">Hex · Introducing Context Studio</a></li>\n        <li><a href=\"https://learn.hex.tech/docs/agent-management/observability\">Hex · Agent observability docs</a></li>\n        <li><a href=\"https://docs.databricks.com/aws/en/genie-agents/monitor\">Databricks · Test and monitor Genie</a></li>\n        <li><a href=\"https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst/verified-query-suggestions\">Snowflake · Verified query suggestions</a></li>\n        <li><a href=\"https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps\">ThoughtSpot · Steps to coach Spotter</a></li>\n        <li><a href=\"https://docs.langchain.com/langsmith/annotation-queues\">LangSmith · Annotation queues</a></li>\n        <li><a href=\"https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions\">MLflow · Labeling sessions</a></li>\n      </ul>\n      <h4>Data &amp; analytics</h4>\n      <ul>\n        <li><a href=\"https://docs.cloud.google.com/looker/docs/conversational-analytics-looker-rollout\">Google · Looker CA rollout strategy</a></li>\n        <li><a href=\"https://cloud.google.com/blog/products/data-analytics/conversational-analytics-in-google-data-cloud-in-q326\">Google Cloud · Conversational Analytics Q3 2026</a></li>\n        <li><a href=\"https://www.salesforce.com/news/stories/tableau-agentic-analytics-platform-announcement/\">Salesforce · Tableau agentic analytics</a></li>\n        <li><a href=\"https://learn.microsoft.com/en-us/power-bi/explore-reports/copilot-pane-summarize-content\">Microsoft · Power BI Copilot summaries</a></li>\n        <li><a href=\"https://www.snowflake.com/en/developers/guides/best-practices-semantic-views-cortex-analyst/\">Snowflake · Semantic view best practices</a></li>\n        <li><a href=\"https://austinhenley.com/pubs/Chattopadhyay2020CHI_NotebookPainpoints.pdf\">CHI 2020 · What's wrong with computational notebooks?</a></li>\n      </ul>\n    </div>"
+}

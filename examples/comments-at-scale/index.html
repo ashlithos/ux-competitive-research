@@ -1,0 +1,857 @@
+<title>Comments at Scale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Google+Sans+Text:wght@400;500&family=Google+Sans+Code:wght@400;500&display=swap">
+<style>
+/* Layout: five numbered chapters as tabs; generous vertical rhythm (72px sections), 620px reading measure, charts carry the facts. Pillar hues: marks use --u/--a/--l, text uses --u-ink/--a-ink/--l-ink. */
+:root{
+  --bg:#F8F9FB; --surface:#FFFFFF; --sunk:#EEF1F5;
+  --ink:#1B1F24; --muted:#5F6875; --faint:#8A93A0; --line:#E2E6EB;
+  --accent:#1A5FC8; --accent-soft:#E7EEFB;
+  --u:#1A5FC8; --u-ink:#1A5FC8; --u-soft:#E7EEFB;
+  --a:#B45309; --a-ink:#9A4708; --a-soft:#FBF0E3;
+  --l:#137A4B; --l-ink:#106A41; --l-soft:#E3F3EA;
+  --ai:#6B4FBB; --ai-soft:#EEE9FB;
+  --mark:#FBE7A1; --mark-ink:#3A2C00;
+  --good:#2E7D4F; --warn:#9A6200; --bad:#B23A3A;
+  --shot-bg:#F1F3F5;
+  --f-display:"Google Sans","Product Sans","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Google Sans Text","Google Sans","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"Google Sans Code",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --read:640px; --wide:1120px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121519; --surface:#1A1E24; --sunk:#22272F;
+    --ink:#E8EBEF; --muted:#A0A9B4; --faint:#7A838E; --line:#2D343E;
+    --accent:#8AB4F8; --accent-soft:#1D2B42;
+    --u:#5B93E8; --u-ink:#8AB4F8; --u-soft:#1D2B42;
+    --a:#C97A22; --a-ink:#F0B36A; --a-soft:#3A2915;
+    --l:#3FA874; --l-ink:#7DD3A7; --l-soft:#16301F;
+    --ai:#B7A3F5; --ai-soft:#2A2340;
+    --mark:#5E4A12; --mark-ink:#FFF1C7;
+    --good:#6CCB92; --warn:#E3B55A; --bad:#EE8A8A;
+    --shot-bg:#E9EBEE;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121519; --surface:#1A1E24; --sunk:#22272F;
+  --ink:#E8EBEF; --muted:#A0A9B4; --faint:#7A838E; --line:#2D343E;
+  --accent:#8AB4F8; --accent-soft:#1D2B42;
+  --u:#5B93E8; --u-ink:#8AB4F8; --u-soft:#1D2B42;
+  --a:#C97A22; --a-ink:#F0B36A; --a-soft:#3A2915;
+  --l:#3FA874; --l-ink:#7DD3A7; --l-soft:#16301F;
+  --ai:#B7A3F5; --ai-soft:#2A2340;
+  --mark:#5E4A12; --mark-ink:#FFF1C7;
+  --good:#6CCB92; --warn:#E3B55A; --bad:#EE8A8A;
+  --shot-bg:#E9EBEE;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;padding:0 20px}
+.wrap{max-width:var(--wide);margin:0 auto;padding-block:36px 96px}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:500;line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.01em}
+h3{font-size:1.35rem}
+h4{font-size:1.05rem}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:.85em}
+.lead{font-size:1.12rem;color:var(--muted);max-width:var(--read)}
+.src{font-family:var(--f-mono);font-size:.7rem;white-space:nowrap;color:var(--accent)}
+.src::before{content:"↗ "}
+.u-ink{color:var(--u-ink)} .a-ink{color:var(--a-ink)} .l-ink{color:var(--l-ink)}
+
+/* header + tabs */
+header.top{display:flex;flex-direction:column;gap:14px;padding-block:8px 28px}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -20px;padding:8px 20px 0}
+.tabs-inner{max-width:var(--wide);margin:0 auto;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs-inner::-webkit-scrollbar{display:none}
+.tab{font-family:var(--f-display);font-size:.95rem;font-weight:500;color:var(--muted);text-decoration:none;padding:10px 14px 12px;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab .num{font-family:var(--f-mono);font-size:.7rem;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--sunk)}
+.tab:hover{color:var(--ink)}
+.tab[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab[aria-current="page"] .num{background:var(--ink);color:var(--bg)}
+.panel{padding-top:48px}
+.js .panel:not(.active),.js .subpanel:not(.active){display:none}
+.sec{padding-block:56px}
+.sec+.sec{border-top:1px solid var(--line)}
+.sec-head{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;max-width:var(--read)}
+
+/* hero thesis */
+.thesis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:8px}
+@media (max-width:820px){.thesis{grid-template-columns:1fr}}
+.pill-card{display:flex;flex-direction:column;gap:12px;padding:24px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink);min-width:0}
+.pill-card:hover{border-color:var(--pc)}
+.pill-card.u{--pc:var(--u);--pi:var(--u-ink)} .pill-card.a{--pc:var(--a);--pi:var(--a-ink)} .pill-card.l{--pc:var(--l);--pi:var(--l-ink)}
+.pill-card .nm{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-size:1.5rem;color:var(--pi)}
+.pill-card .nm i{width:12px;height:12px;border-radius:50%;background:var(--pc)}
+.pill-card p{color:var(--muted)}
+.stage{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.meter{display:inline-flex;gap:3px}
+.meter b{width:18px;height:6px;border-radius:3px;background:var(--line)}
+.meter b.on{background:var(--pc)}
+
+/* answers */
+.answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:820px){.answers{grid-template-columns:1fr}}
+.ans{display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:2px solid var(--ink)}
+.ans .q{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ans .a{font-family:var(--f-display);font-size:1.25rem;line-height:1.3}
+
+/* chart frame */
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px}
+.chart-title{font-family:var(--f-display);font-size:1.1rem;font-weight:500}
+.chart-sub{font-size:.88rem;color:var(--muted);margin-top:4px}
+.chart-foot{font-size:.78rem;color:var(--faint);margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 14px}
+.tip{position:relative}
+.tip[data-tip]:hover::after,.tip[data-tip]:focus::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:var(--ink);color:var(--bg);font-family:var(--f-body);font-size:.78rem;line-height:1.4;padding:8px 10px;border-radius:8px;width:max-content;max-width:260px;white-space:normal;z-index:5;pointer-events:none;text-align:left;font-weight:400}
+
+/* bar chart */
+.bars{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+.bar-row{display:grid;grid-template-columns:minmax(120px,240px) minmax(0,1fr);gap:16px;align-items:center}
+@media (max-width:560px){.bar-row{grid-template-columns:1fr;gap:4px}}
+.bar-label{font-size:.9rem}
+.bar-label small{display:block;font-family:var(--f-mono);font-size:.66rem;color:var(--faint);letter-spacing:.04em}
+.bar-track{display:flex;align-items:center;gap:10px;min-width:0}
+.bar{height:18px;border-radius:0 4px 4px 0;background:var(--faint);min-width:4px}
+.bar.hi{background:var(--accent)}
+.bar-val{font-family:var(--f-display);font-weight:500;font-variant-numeric:tabular-nums;font-size:.95rem;white-space:nowrap}
+
+/* quotes */
+.quotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px}
+@media (max-width:820px){.quotes{grid-template-columns:1fr}}
+.quote{font-family:var(--f-display);font-size:1.08rem;line-height:1.4;display:flex;flex-direction:column;gap:10px}
+.quote cite{font-family:var(--f-body);font-style:normal;font-size:.8rem;color:var(--muted)}
+
+/* coverage grid */
+.cov-wrap{overflow-x:auto;margin-top:24px}
+table.cov{border-collapse:separate;border-spacing:0;width:100%;min-width:560px;font-size:.9rem}
+.cov th,.cov td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.cov thead th{font-family:var(--f-display);font-weight:500;font-size:.95rem;border-bottom:1px solid var(--ink)}
+.cov thead th.c{text-align:center;width:110px}
+.cov .grp td{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:20px;border-bottom:0}
+.cov td.c{text-align:center}
+.dot{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:middle;cursor:default}
+.dot.f{background:var(--pc)}
+.dot.h{border:2.5px solid var(--pc);background:transparent}
+.dot.n{width:10px;height:2px;border-radius:1px;background:var(--line)}
+.cu{--pc:var(--u)} .ca{--pc:var(--a)} .cl{--pc:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.84rem;color:var(--muted);margin-top:18px;align-items:center}
+.legend .dot{--pc:var(--muted);width:13px;height:13px;margin-right:6px}
+
+/* heatmap */
+.heat{display:grid;grid-template-columns:130px repeat(3,minmax(0,1fr));gap:6px;margin-top:24px}
+.heat .hh{font-family:var(--f-display);font-weight:500;font-size:.95rem;padding:4px 6px;display:flex;align-items:center;gap:8px}
+.heat .hh i{width:10px;height:10px;border-radius:50%;background:var(--pc)}
+.heat .rh{font-family:var(--f-display);font-size:.9rem;display:flex;flex-direction:column;justify-content:center}
+.heat .rh small{font-family:var(--f-mono);font-size:.64rem;color:var(--faint)}
+.cell{border-radius:10px;min-height:64px;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:1.3rem;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink)}
+.cell.v0{background:var(--sunk);color:var(--faint);font-size:1rem}
+.cell.v1{background:color-mix(in srgb,var(--pc) 16%,var(--surface))}
+.cell.v2{background:color-mix(in srgb,var(--pc) 30%,var(--surface))}
+.cell.v3{background:color-mix(in srgb,var(--pc) 46%,var(--surface))}
+.cell.v4{background:color-mix(in srgb,var(--pc) 64%,var(--surface));color:#fff}
+.cell.v5{background:var(--pc);color:#fff}
+@media (max-width:560px){.heat{grid-template-columns:90px repeat(3,minmax(0,1fr))}.cell{min-height:52px;font-size:1.05rem}}
+
+/* loop matrix */
+table.lm{border-collapse:separate;border-spacing:0;width:100%;min-width:640px}
+.lm th,.lm td{padding:12px 8px;border-bottom:1px solid var(--line);text-align:center;font-size:.9rem}
+.lm th:first-child,.lm td:first-child{text-align:left}
+.lm thead th{font-family:var(--f-display);font-weight:500;border-bottom:1px solid var(--ink)}
+.lm thead th small{display:block;font-family:var(--f-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase}
+.lm tr.ref td{color:var(--muted)}
+.lm td.empty-col{background:color-mix(in srgb,var(--bad) 6%,transparent)}
+
+/* big facts */
+.bigfacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px}
+@media (max-width:820px){.bigfacts{grid-template-columns:1fr}}
+.bf{display:flex;flex-direction:column;gap:6px}
+.bf b{font-family:var(--f-display);font-size:2.4rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
+.bf span{font-size:.92rem;color:var(--muted);max-width:30ch}
+
+/* competitive */
+.seg{display:flex;flex-wrap:wrap;gap:6px;padding:6px;background:var(--sunk);border-radius:14px;width:max-content;max-width:100%;margin:28px 0 8px}
+.seg a{font-family:var(--f-display);font-weight:500;font-size:.95rem;text-decoration:none;color:var(--muted);padding:9px 18px;border-radius:10px;display:flex;align-items:center;gap:8px}
+.seg a i{width:10px;height:10px;border-radius:50%;background:var(--faint)}
+.seg a.u i{background:var(--u)} .seg a.a i{background:var(--a)} .seg a.l i{background:var(--l)}
+.seg a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sp-u{--pc:var(--u);--pi:var(--u-ink);--ps:var(--u-soft)} .sp-a{--pc:var(--a);--pi:var(--a-ink);--ps:var(--a-soft)} .sp-l{--pc:var(--l);--pi:var(--l-ink);--ps:var(--l-soft)}
+.p-hero{padding-block:48px 24px;display:flex;flex-direction:column;gap:14px}
+.p-hero .kick{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pi);font-weight:500}
+.p-strip{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;margin-top:6px}
+.cujs{display:flex;flex-direction:column;gap:10px;margin-top:20px;max-width:760px}
+.cuj{display:flex;gap:14px;align-items:baseline;font-family:var(--f-display);font-size:1.05rem}
+.cuj span{font-family:var(--f-mono);font-size:.68rem;color:var(--pi);white-space:nowrap;letter-spacing:.04em}
+.pat{padding-block:48px;border-top:1px solid var(--line)}
+.pat-head{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.pat-num{font-family:var(--f-mono);font-size:.72rem;color:var(--pi);letter-spacing:.06em}
+.pat-head p{color:var(--muted)}
+.who{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px 28px;margin-bottom:28px}
+.who div{font-size:.9rem;line-height:1.45;padding-left:12px;border-left:2px solid var(--line)}
+.who b{font-family:var(--f-display);font-weight:500;display:block}
+.who span{color:var(--muted)}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:24px 20px}
+.shot{margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.shot-img{display:block;width:100%;aspect-ratio:16/10;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--shot-bg);cursor:zoom-in;overflow:hidden}
+.shot-img img{display:block;width:100%;height:100%;object-fit:contain;object-position:center top}
+.shot-img:hover{border-color:var(--accent)}
+.shot figcaption{display:flex;flex-direction:column;gap:2px;font-size:.88rem}
+.shot figcaption b{font-family:var(--f-display);font-weight:500;font-size:.78rem;color:var(--muted)}
+.shot figcaption .t{font-family:var(--f-display);font-size:.98rem;line-height:1.3}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:56px;flex-wrap:wrap}
+.pager a{font-family:var(--f-display);font-weight:500;text-decoration:none;color:var(--ink);padding:12px 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.pager a.next{margin-left:auto}
+.pager a:hover{border-color:var(--accent)}
+
+/* design */
+.princ{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px}
+@media (max-width:820px){.princ{grid-template-columns:1fr}}
+.princ h4{display:flex;align-items:center;gap:10px;color:var(--pi);font-size:1.2rem;margin-bottom:16px}
+.princ h4 i{width:12px;height:12px;border-radius:50%;background:var(--pc)}
+.princ ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.princ li b{font-family:var(--f-display);font-weight:500;display:block;font-size:1.02rem}
+.princ li span{font-size:.9rem;color:var(--muted)}
+.loopfig{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:40px;align-items:center}
+@media (max-width:820px){.loopfig{grid-template-columns:1fr}}
+.loopfig svg{width:100%;height:auto;max-width:380px;display:block;margin:0 auto}
+.lp-ring{fill:none;stroke:var(--line);stroke-width:2}
+.lp-node circle{stroke:var(--surface);stroke-width:3}
+.lp-node.u circle{fill:var(--u)} .lp-node.a circle{fill:var(--a)} .lp-node.l circle{fill:var(--l)}
+.lp-node text{fill:#fff;font-family:var(--f-mono);font-size:13px;font-weight:500;text-anchor:middle;dominant-baseline:central}
+.lp-lab{fill:var(--ink);font-family:var(--f-display);font-size:14px;font-weight:500}
+.lp-c1{fill:var(--ink);font-family:var(--f-display);font-size:17px;font-weight:500;text-anchor:middle}
+.lp-c2{fill:var(--muted);font-family:var(--f-body);font-size:12px;text-anchor:middle}
+.lp-arrow{fill:var(--faint)}
+.xgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 32px}
+@media (max-width:860px){.xgrid{grid-template-columns:1fr}}
+.xcard{display:flex;flex-direction:column;gap:12px;min-width:0}
+.xcard .xn{font-family:var(--f-mono);font-size:.7rem;color:var(--pi);letter-spacing:.06em}
+.xcard p{font-size:.92rem;color:var(--muted)}
+.opps{display:flex;flex-direction:column}
+.opp{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1fr);gap:20px;padding-block:18px;border-bottom:1px solid var(--line);align-items:baseline}
+.opp:first-child{border-top:1px solid var(--line)}
+@media (max-width:760px){.opp{grid-template-columns:1fr;gap:4px}}
+.opp .tg{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--pi);display:flex;align-items:center;gap:8px}
+.opp .tg i{width:9px;height:9px;border-radius:50%;background:var(--pc)}
+.opp h4{font-size:1.02rem}
+.opp p{font-size:.9rem;color:var(--muted)}
+.opp p b{font-family:var(--f-display);font-weight:500;color:var(--ink)}
+.flag{display:inline-block;font-family:var(--f-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;background:var(--mark);color:var(--mark-ink);padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle}
+
+/* sketches */
+.sketch{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-family:var(--f-display);font-size:.84rem;line-height:1.4}
+.sk-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--sunk);font-weight:500}
+.sk-bar .dots{display:flex;gap:5px}
+.sk-bar .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block}
+.sk-body{padding:12px;display:flex;flex-direction:column;gap:10px}
+.sk-cap{display:none}
+.ai-box{border:1px dashed var(--ai);background:var(--ai-soft);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.ai-box .lab{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ai)}
+.cmt{display:flex;gap:8px;align-items:flex-start}
+.av{flex:0 0 22px;height:22px;border-radius:50%;background:var(--sunk);border:1px solid var(--line);font-size:.65rem;display:grid;place-items:center;color:var(--muted)}
+.cmt .t{min-width:0}
+.cmt .n{font-weight:500;font-size:.78rem}
+.btnrow{display:flex;flex-wrap:wrap;gap:6px}
+.sbtn{font-family:var(--f-display);font-size:.75rem;padding:4px 10px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.sbtn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sbtn.ai{border-color:var(--ai);color:var(--ai)}
+.pill{font-family:var(--f-mono);font-size:.64rem;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.ok{color:var(--good);border-color:var(--good)}
+.pill.w{color:var(--warn);border-color:var(--warn)}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.check{display:flex;gap:8px;align-items:flex-start;padding:7px 8px;border:1px solid var(--line);border-radius:6px}
+.box{flex:0 0 14px;height:14px;border:1.5px solid var(--muted);border-radius:3px;margin-top:2px}
+.box.on{background:var(--ink);border-color:var(--ink)}
+.scope-pick{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;width:max-content;max-width:100%}
+.scope-pick span{padding:3px 9px;font-size:.72rem;border-right:1px solid var(--line)}
+.scope-pick span:last-child{border-right:0}
+.scope-pick .on{background:var(--ink);color:var(--bg)}
+.diff{font-family:var(--f-mono);font-size:.7rem;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.diff div{padding:3px 8px;white-space:pre-wrap;word-break:break-word}
+.diff .plus{background:color-mix(in srgb,var(--good) 14%,transparent)}
+.diff .minus{background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.split{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px}
+@media (max-width:480px){.split{grid-template-columns:1fr}}
+.qlist{display:flex;flex-direction:column;gap:4px;font-size:.74rem}
+.qlist div{padding:5px 7px;border-radius:5px;border:1px solid var(--line);display:flex;justify-content:space-between;gap:6px}
+.qlist .cur{background:var(--sunk);border-color:var(--ink)}
+.input{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted)}
+.scopechip{font-family:var(--f-mono);font-size:.66rem;background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:4px}
+.sug{border:1px dashed var(--ai);color:var(--ai);border-radius:999px;padding:1px 8px;font-size:.72rem}
+.human{border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:.72rem}
+
+/* questions */
+.qs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:36px 40px}
+@media (max-width:760px){.qs{grid-template-columns:1fr}}
+.qn{display:flex;flex-direction:column;gap:8px}
+.qn .k{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.qn h4{font-size:1.2rem;line-height:1.3}
+.qn p{font-size:.9rem;color:var(--muted)}
+.unk{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;max-width:var(--read)}
+.unk li{padding-left:22px;position:relative;font-size:.95rem}
+.unk li::before{content:"?";position:absolute;left:0;top:0;font-family:var(--f-mono);color:var(--faint)}
+
+/* sources */
+.sources{columns:2 320px;column-gap:40px;font-size:.88rem}
+.sources h4{break-after:avoid;margin:18px 0 8px;font-size:.92rem}
+.sources ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.sources li{break-inside:avoid}
+.credit{font-size:.84rem;color:var(--muted);max-width:var(--read);margin-top:24px}
+
+dialog#lightbox{max-width:min(1400px,96vw);max-height:94vh;width:auto;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}
+dialog#lightbox::backdrop{background:rgba(10,14,20,.72)}
+#lb-img{display:block;max-width:100%;max-height:72vh;margin:0 auto;background:var(--shot-bg);border-radius:8px}
+.lb-meta{display:flex;flex-direction:column;gap:6px;margin-top:12px;max-width:900px;font-size:.9rem}
+.lb-meta b{font-family:var(--f-display);font-weight:500;font-size:1rem}
+.lb-meta .d{color:var(--muted)}
+.lb-close{float:right;font-family:var(--f-display);font-size:.8rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:4px 10px;margin-bottom:10px;cursor:pointer}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-size:.82rem;color:var(--faint)}
+</style>
+<script>document.documentElement.classList.add('js');</script>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">Research brief · October 2026</div>
+  <h1>Comments at Scale</h1>
+  <p class="lead">How products help people and agents understand, act on, and learn from comments across a team, folder or workspace.</p>
+</header>
+
+<nav class="tabs" aria-label="Chapters"><div class="tabs-inner">
+  <a class="tab" href="#overview" data-tab="overview"><span class="num">1</span>Overview</a>
+  <a class="tab" href="#competitive" data-tab="competitive"><span class="num">2</span>Competitive landscape</a>
+  <a class="tab" href="#design" data-tab="design"><span class="num">3</span>Principles &amp; explorations</a>
+  <a class="tab" href="#questions" data-tab="questions"><span class="num">4</span>Open questions</a>
+  <a class="tab" href="#sources" data-tab="sources"><span class="num">5</span>Sources</a>
+</div></nav>
+
+<!-- ============ 1 OVERVIEW ============ -->
+<div class="panel" id="overview">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">The framework</div><h2>Three jobs, three levels of maturity</h2></div>
+    <div class="thesis">
+      <a class="pill-card u" href="#understand"><span class="nm"><i></i>Understand</span><p>Summarize, cluster and catch up on many comments.</p><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b class="on"></b></span>Table stakes</span></a>
+      <a class="pill-card a" href="#act"><span class="nm"><i></i>Act</span><p>Apply, resolve, delegate or route comments in bulk.</p><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b></b></span>Emerging</span></a>
+      <a class="pill-card l" href="#learn"><span class="nm"><i></i>Learn</span><p>Turn comments into rules and context for future work.</p><span class="stage"><span class="meter"><b class="on"></b><b></b><b></b></span>Frontier</span></a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="eyebrow">Short answers</div><h2>Your three questions</h2></div>
+    <div class="answers">
+      <div class="ans"><span class="q">Real problem?</span><span class="a">Yes. Review is now the bottleneck.</span><a href="#evidence" class="src">evidence</a></div>
+      <div class="ans"><span class="q">How is it solved?</span><span class="a">8 patterns across Understand, Act, Learn.</span><a href="#competitive" class="src">landscape</a></div>
+      <div class="ans"><span class="q">Data analytics?</span><span class="a">Fixes land in shared context, but human comments are left out.</span><a href="#data-lens" class="src">data lens</a></div>
+    </div>
+  </section>
+
+  <section class="sec" id="evidence">
+    <div class="sec-head"><div class="eyebrow">Evidence</div><h2>Output is up. Review can't keep up.</h2></div>
+    <div class="chart">
+      <div class="chart-title">Change on high-AI-adoption engineering teams</div>
+      <div class="chart-sub">% change vs. low adoption · review-related metrics highlighted</div>
+      <div class="bars">
+        <div class="bar-row"><div class="bar-label">PRs merged<small>2025 · 10k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+98% PRs merged per developer. Faros AI Productivity Paradox, 2025"><div class="bar" style="width:22.2%"></div><span class="bar-val">+98%</span></div></div>
+        <div class="bar-row"><div class="bar-label">PR review time<small>2025 · 10k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+91% PR review time. Faros AI Productivity Paradox, 2025"><div class="bar hi" style="width:20.6%"></div><span class="bar-val">+91%</span></div></div>
+        <div class="bar-row"><div class="bar-label">Median time in review<small>2026 · 22k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+441% median time in PR review. Faros AI Engineering Report, 2026"><div class="bar hi" style="width:100%"></div><span class="bar-val">+441%</span></div></div>
+        <div class="bar-row"><div class="bar-label">Bugs per PR<small>2026 · 22k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+54% bugs per PR. Faros AI Engineering Report, 2026"><div class="bar" style="width:12.2%"></div><span class="bar-val">+54%</span></div></div>
+        <div class="bar-row"><div class="bar-label">PRs merged with no review<small>2026 · 22k devs</small></div><div class="bar-track tip" tabindex="0" data-tip="+31% more PRs merged without any review. Faros AI Engineering Report, 2026"><div class="bar hi" style="width:7%"></div><span class="bar-val">+31%</span></div></div>
+      </div>
+      <div class="chart-foot"><a class="src" href="https://www.faros.ai/blog/ai-software-engineering">Faros 2025</a><a class="src" href="https://www.faros.ai/blog/ai-code-quality-senior-engineer-review-burden">Faros 2026</a></div>
+    </div>
+    <div class="quotes">
+      <div class="quote">"Open it a week later with 40+ comments."<cite>Designer asking Figma for comment summaries, 2025 · <a class="src" href="https://forum.figma.com/suggest-a-feature-11/summarise-all-comments-into-next-steps-with-figma-ai-36882">forum</a></cite></div>
+      <div class="quote">Data teams can't read "hundreds of individual Threads."<cite>Hex, on why it built a Review Agent · <a class="src" href="https://hex.tech/blog/introducing-context-suggestions/">blog</a></cite></div>
+      <div class="quote">4 major platforms shipped comment summaries in 2025–26.<cite>Google, Microsoft, Atlassian, Figma · <a class="src" href="https://workspaceupdates.googleblog.com/2026/07/streamline-collaboration-in-google-docs-with-Gemini-powered-comment-workflows.html">Google</a></cite></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head"><div class="eyebrow">Who does what</div><h2>Docs tools understand. Code and data tools learn.</h2></div>
+    <div class="chart">
+      <div class="chart-title">Capability by product</div>
+      <div class="chart-sub">Based on public docs reviewed · hover a dot for detail</div>
+      <div class="cov-wrap"><table class="cov"><thead><tr><th>Product</th><th class="c u-ink">Understand</th><th class="c a-ink">Act</th><th class="c l-ink">Learn</th></tr></thead><tbody><tr class="grp"><td colspan="4">Docs &amp; design</td></tr><tr><td>Google Docs &amp; Drive · Gemini</td><td class="c"><span class="dot f cu tip" tabindex="0" data-tip="Summaries, Q&amp;A on comments, Catch me up across files" aria-label="Understand: Summaries, Q&amp;A on comments, Catch me up across files"></span></td><td class="c"><span class="dot f ca tip" tabindex="0" data-tip="Drafts replies, comments and edits" aria-label="Act: Drafts replies, comments and edits"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr><td>Confluence · Rovo</td><td class="c"><span class="dot f cu tip" tabindex="0" data-tip="Auto-summary of unresolved comments" aria-label="Understand: Auto-summary of unresolved comments"></span></td><td class="c"><span class="dot h ca tip" tabindex="0" data-tip="Mark all read / resolved (no AI)" aria-label="Act: Mark all read / resolved (no AI)"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr><td>Word · Copilot</td><td class="c"><span class="dot f cu tip" tabindex="0" data-tip="Summary with Activity and Discussion tabs" aria-label="Understand: Summary with Activity and Discussion tabs"></span></td><td class="c"><span class="dot f ca tip" tabindex="0" data-tip="Adds, reads, replies to and manages comment threads" aria-label="Act: Adds, reads, replies to and manages comment threads"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr><td>Figma &amp; FigJam</td><td class="c"><span class="dot f cu tip" tabindex="0" data-tip="Agent summarizes comments; FigJam sorts stickies" aria-label="Understand: Agent summarizes comments; FigJam sorts stickies"></span></td><td class="c"><span class="dot n" aria-label="Act: none found"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr><td>Frame.io</td><td class="c"><span class="dot h cu tip" tabindex="0" data-tip="Filters by person, hashtag, status" aria-label="Understand: Filters by person, hashtag, status"></span></td><td class="c"><span class="dot h ca tip" tabindex="0" data-tip="Export / copy filtered comments (no AI)" aria-label="Act: Export / copy filtered comments (no AI)"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr><td>Tableau · Power BI</td><td class="c"><span class="dot h cu tip" tabindex="0" data-tip="Comments pane with snapshots (Tableau)" aria-label="Understand: Comments pane with snapshots (Tableau)"></span></td><td class="c"><span class="dot n" aria-label="Act: none found"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr class="grp"><td colspan="4">Code review</td></tr><tr><td>GitHub · Copilot</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot f ca tip" tabindex="0" data-tip="Batch suggestions; Fix with Copilot" aria-label="Act: Batch suggestions; Fix with Copilot"></span></td><td class="c"><span class="dot h cl tip" tabindex="0" data-tip="Custom instructions written by people" aria-label="Learn: Custom instructions written by people"></span></td></tr><tr><td>Cursor Bugbot</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot f ca tip" tabindex="0" data-tip="Autofix and Fix All" aria-label="Act: Autofix and Fix All"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Learned rules from reactions and replies" aria-label="Learn: Learned rules from reactions and replies"></span></td></tr><tr><td>CodeRabbit</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot f ca tip" tabindex="0" data-tip="Resolve all comments by command" aria-label="Act: Resolve all comments by command"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Learnings scoped to repo or org" aria-label="Learn: Learnings scoped to repo or org"></span></td></tr><tr><td>Vercel</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot h ca tip" tabindex="0" data-tip="CLI to list, reply, resolve; agents do the rest" aria-label="Act: CLI to list, reply, resolve; agents do the rest"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr class="grp"><td colspan="4">Product ops</td></tr><tr><td>Linear</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot f ca tip" tabindex="0" data-tip="Triage Intelligence routing and duplicates" aria-label="Act: Triage Intelligence routing and duplicates"></span></td><td class="c"><span class="dot h cl tip" tabindex="0" data-tip="Workspace guidance written by people" aria-label="Learn: Workspace guidance written by people"></span></td></tr><tr><td>Notion</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot f ca tip" tabindex="0" data-tip="Agents triggered by new comments" aria-label="Act: Agents triggered by new comments"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr><td>Productboard</td><td class="c"><span class="dot f cu tip" tabindex="0" data-tip="Spark themes with evidence counts" aria-label="Understand: Spark themes with evidence counts"></span></td><td class="c"><span class="dot n" aria-label="Act: none found"></span></td><td class="c"><span class="dot n" aria-label="Learn: none found"></span></td></tr><tr class="grp"><td colspan="4">Data &amp; analytics</td></tr><tr><td>Hex</td><td class="c"><span class="dot f cu tip" tabindex="0" data-tip="Topics and warnings across threads" aria-label="Understand: Topics and warnings across threads"></span></td><td class="c"><span class="dot h ca tip" tabindex="0" data-tip="Tag the data team into a thread" aria-label="Act: Tag the data team into a thread"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Review Agent drafts context changes" aria-label="Learn: Review Agent drafts context changes"></span></td></tr><tr><td>Databricks Genie</td><td class="c"><span class="dot f cu tip" tabindex="0" data-tip="Monitor tab, Analyze Space Usage" aria-label="Understand: Monitor tab, Analyze Space Usage"></span></td><td class="c"><span class="dot h ca tip" tabindex="0" data-tip="Respond to review requests" aria-label="Act: Respond to review requests"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Suggested improvements; benchmarks" aria-label="Learn: Suggested improvements; benchmarks"></span></td></tr><tr><td>Snowflake Cortex</td><td class="c"><span class="dot h cu tip" tabindex="0" data-tip="Groups unanswered questions" aria-label="Understand: Groups unanswered questions"></span></td><td class="c"><span class="dot n" aria-label="Act: none found"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Verified-query suggestions" aria-label="Learn: Verified-query suggestions"></span></td></tr><tr><td>ThoughtSpot</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot h ca tip" tabindex="0" data-tip="Admins review downvote comments" aria-label="Act: Admins review downvote comments"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Coaching: references and business terms" aria-label="Learn: Coaching: references and business terms"></span></td></tr><tr><td>Looker</td><td class="c"><span class="dot h cu tip" tabindex="0" data-tip="Trace and feedback review" aria-label="Understand: Trace and feedback review"></span></td><td class="c"><span class="dot n" aria-label="Act: none found"></span></td><td class="c"><span class="dot h cl tip" tabindex="0" data-tip="Instructions and golden queries, written by people" aria-label="Learn: Instructions and golden queries, written by people"></span></td></tr><tr class="grp"><td colspan="4">Agent evaluation</td></tr><tr><td>LangSmith</td><td class="c"><span class="dot h cu tip" tabindex="0" data-tip="Filter traces by feedback" aria-label="Understand: Filter traces by feedback"></span></td><td class="c"><span class="dot n" aria-label="Act: none found"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Rubric queues to datasets" aria-label="Learn: Rubric queues to datasets"></span></td></tr><tr><td>MLflow</td><td class="c"><span class="dot n" aria-label="Understand: none found"></span></td><td class="c"><span class="dot n" aria-label="Act: none found"></span></td><td class="c"><span class="dot f cl tip" tabindex="0" data-tip="Expert labeling sessions" aria-label="Learn: Expert labeling sessions"></span></td></tr></tbody></table></div>
+      <div class="legend"><span><span class="dot f"></span>AI-assisted</span><span><span class="dot h"></span>Basic or manual</span><span><span class="dot n"></span>&nbsp;None found</span></div>
+    </div>
+  </section>
+  <div class="pager"><a class="next" href="#competitive">2 · Competitive landscape →</a></div>
+</div>
+
+<!-- ============ 2 COMPETITIVE ============ -->
+<div class="panel" id="competitive">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">2 · Competitive landscape</div><h2>Where products reach today</h2><p class="muted">Facts only. Number of products shipping each pillar at each scope.</p></div>
+    <div class="chart">
+      <div class="chart-title">Products by pillar and scope</div>
+      <div class="chart-sub">Hover a cell for the products</div>
+      <div class="heat" role="table" aria-label="Products by pillar and scope"><div></div><div class="hh cu"><i></i>Understand</div><div class="hh ca"><i></i>Act</div><div class="hh cl"><i></i>Learn</div><div class="rh">Thread<small>one conversation</small></div><div class="cell cu v3 tip" tabindex="0" data-tip="Gemini in Docs, Rovo in Jira, Copilot in Word" aria-label="Thread, Understand: 3 products. Gemini in Docs, Rovo in Jira, Copilot in Word">3</div><div class="cell ca v3 tip" tabindex="0" data-tip="Gemini draft reply, Fix with Copilot, @copilot" aria-label="Thread, Act: 3 products. Gemini draft reply, Fix with Copilot, @copilot">3</div><div class="cell cl v2 tip" tabindex="0" data-tip="@cursor remember, CodeRabbit chat" aria-label="Thread, Learn: 2 products. @cursor remember, CodeRabbit chat">2</div><div class="rh">Artifact<small>doc, PR, page</small></div><div class="cell cu v4 tip" tabindex="0" data-tip="Confluence summary, Figma agent, Word Activity tab, Tableau comments" aria-label="Artifact, Understand: 4 products. Confluence summary, Figma agent, Word Activity tab, Tableau comments">4</div><div class="cell ca v5 tip" tabindex="0" data-tip="GitHub batch, Bugbot Fix All, CodeRabbit resolve, vercel comments, Frame.io filters" aria-label="Artifact, Act: 5 products. GitHub batch, Bugbot Fix All, CodeRabbit resolve, vercel comments, Frame.io filters">5</div><div class="cell cl v0 tip" tabindex="0" data-tip="None found" aria-label="Artifact, Learn: 0 products. None found">—</div><div class="rh">Folder<small>repo, space</small></div><div class="cell cu v3 tip" tabindex="0" data-tip="Drive Catch me up, Genie Monitor, Hex Context Studio" aria-label="Folder, Understand: 3 products. Drive Catch me up, Genie Monitor, Hex Context Studio">3</div><div class="cell ca v2 tip" tabindex="0" data-tip="Notion agent triggers, Linear triage rules" aria-label="Folder, Act: 2 products. Notion agent triggers, Linear triage rules">2</div><div class="cell cl v4 tip" tabindex="0" data-tip="Bugbot learned rules, CodeRabbit repo learnings, Genie instructions, Snowflake verified queries" aria-label="Folder, Learn: 4 products. Bugbot learned rules, CodeRabbit repo learnings, Genie instructions, Snowflake verified queries">4</div><div class="rh">Workspace<small>team, org</small></div><div class="cell cu v3 tip" tabindex="0" data-tip="Productboard Spark, Dovetail, Hex topics" aria-label="Workspace, Understand: 3 products. Productboard Spark, Dovetail, Hex topics">3</div><div class="cell ca v1 tip" tabindex="0" data-tip="Linear Triage Intelligence" aria-label="Workspace, Act: 1 products. Linear Triage Intelligence">1</div><div class="cell cl v4 tip" tabindex="0" data-tip="CodeRabbit org learnings, Linear guidance, LangSmith feedback configs, ThoughtSpot coaching" aria-label="Workspace, Learn: 4 products. CodeRabbit org learnings, Linear guidance, LangSmith feedback configs, ThoughtSpot coaching">4</div></div>
+      <div class="chart-foot">Learning skips the artifact level. Acting rarely reaches past one artifact.</div>
+    </div>
+  </section>
+
+  <nav class="seg" aria-label="Pillars">
+    <a class="u" href="#understand" data-sub="understand"><i></i>Understand</a>
+    <a class="a" href="#act" data-sub="act"><i></i>Act</a>
+    <a class="l" href="#learn" data-sub="learn"><i></i>Learn</a>
+    <a href="#data-lens" data-sub="data-lens"><i></i>Data lens</a>
+  </nav>
+
+  <!-- UNDERSTAND -->
+  <div class="subpanel sp-u" id="understand">
+    <div class="p-hero">
+      <span class="kick">Pillar 1 · Understand</span>
+      <h2>Make sense of comments without reading them all</h2>
+      <div class="p-strip"><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b class="on"></b></span>Table stakes</span><span class="stage">7 products · 10 screenshots</span></div>
+      <div class="cujs">
+        <div class="cuj"><span>CUJ U-1</span>"40 comments. What's unresolved, and who's waiting on me?"</div>
+        <div class="cuj"><span>CUJ U-2</span>"What changed across my files since I last looked?"</div>
+        <div class="cuj"><span>CUJ U-3</span>"What are people asking for most?"</div>
+      </div>
+    </div>
+    <article class="pat" id="p-digest">
+      <div class="pat-head"><span class="pat-num">U1 · Artifact · CUJ U-1</span><h3>Digest at the top of the comment panel</h3></div>
+      <div class="who">
+        <div><b>Confluence</b><span>Auto-summary of unresolved comments at 3+; refresh, copy, rate.</span> <a class="src" href="https://support.atlassian.com/confluence-cloud/docs/summarize-comments-using-atlassian-intelligence/">docs</a></div>
+        <div><b>Figma agent</b><span>Groups a file's comments into themes and statuses.</span> <a class="src" href="https://www.figma.com/solutions/ai-comment-summarizer/">page</a></div>
+        <div><b>Word Copilot</b><span>Activity tab by time window; Discussion tab for comments.</span> <a class="src" href="https://office-watch.com/2025/copilot-word-365-document-summary-gets-better-for-some/">source</a></div>
+        <div><b>FigJam AI</b><span>Sorts stickies into themes; writes a summary to the board.</span> <a class="src" href="https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI">help</a></div>
+        <div><b>Tableau</b><span>Comments with view snapshots. No AI on comments found.</span> <a class="src" href="https://help.tableau.com/current/pro/desktop/en-us/comment.htm">help</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-confluence-summary"><button class="shot-img" type="button" data-full="shots/confluence-summary.webp" data-prod="Confluence · Rovo" data-cap="The &quot;Comment summary&quot; card at the top of the comments panel. Each bullet names the commenter and ends in numbered citations that jump to the source comments." data-detail="Every bullet ends in numbered citation chips that link to the source comments." data-src="https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/" data-stype="Frame from Atlassian help GIF" aria-label="Enlarge: Confluence · Rovo, Comment summary with citation chips"><img src="shots/confluence-summary.webp" width="570" height="560" loading="lazy" alt="The &quot;Comment summary&quot; card at the top of the comments panel. Each bullet names the commenter and ends in numbered citations that jump to the source comments."></button><figcaption><b>Confluence · Rovo</b><span class="t">Comment summary with citation chips</span></figcaption></figure><figure class="shot" id="s-figma-agent-summary"><button class="shot-img" type="button" data-full="shots/figma-agent-summary.webp" data-prod="Figma · agent" data-cap="Figma&#x27;s agent answers &quot;Can you summarize the comments on this page?&quot; with 12 comments grouped into Scope Questions, Design Feedback and Pending Confirmation." data-detail="One category is a status (Pending Confirmation), not a topic." data-src="https://www.figma.com/solutions/ai-comment-summarizer/" data-stype="Figma product page" aria-label="Enlarge: Figma · agent, 12 comments grouped by status"><img src="shots/figma-agent-summary.webp" width="1600" height="900" loading="lazy" alt="Figma&#x27;s agent answers &quot;Can you summarize the comments on this page?&quot; with 12 comments grouped into Scope Questions, Design Feedback and Pending Confirmation."></button><figcaption><b>Figma · agent</b><span class="t">12 comments grouped by status</span></figcaption></figure><figure class="shot" id="s-word-copilot-tabs"><button class="shot-img" type="button" data-full="shots/word-copilot-tabs.webp" data-prod="Word · Copilot" data-cap="The Copilot Summary at the top of a Word doc, with tabs for Summary, Insights, Activity, Discussion and Coaching, and a Brief/Standard/Detailed length control." data-detail="Comments have their own Discussion tab; summary length is adjustable." data-src="https://office-watch.com/2025/copilot-word-365-document-summary-gets-better-for-some/" data-stype="Press screenshot · Office Watch" aria-label="Enlarge: Word · Copilot, Summary tabs: Activity &amp; Discussion"><img src="shots/word-copilot-tabs.webp" width="575" height="431" loading="lazy" alt="The Copilot Summary at the top of a Word doc, with tabs for Summary, Insights, Activity, Discussion and Coaching, and a Brief/Standard/Detailed length control."></button><figcaption><b>Word · Copilot</b><span class="t">Summary tabs: Activity &amp; Discussion</span></figcaption></figure><figure class="shot" id="s-figjam-summary"><button class="shot-img" type="button" data-full="shots/figjam-summary.webp" data-prod="FigJam AI" data-cap="Summarize stickies: FigJam AI creates a new summary object on the board next to the source notes." data-detail="The summary is a new object on the canvas rather than a chat reply." data-src="https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI" data-stype="Figma help screenshot" aria-label="Enlarge: FigJam AI, Summary written onto the board"><img src="shots/figjam-summary.webp" width="1800" height="1350" loading="lazy" alt="Summarize stickies: FigJam AI creates a new summary object on the board next to the source notes."></button><figcaption><b>FigJam AI</b><span class="t">Summary written onto the board</span></figcaption></figure><figure class="shot" id="s-figjam-sort"><button class="shot-img" type="button" data-full="shots/figjam-sort.webp" data-prod="FigJam AI" data-cap="Sort stickies: FigJam AI copies the selected stickies and groups them by theme into new sections." data-detail="Sorting works on a copy; the original stickies stay in place." data-src="https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI" data-stype="Figma help screenshot" aria-label="Enlarge: FigJam AI, Stickies sorted into themes"><img src="shots/figjam-sort.webp" width="1800" height="1350" loading="lazy" alt="Sort stickies: FigJam AI copies the selected stickies and groups them by theme into new sections."></button><figcaption><b>FigJam AI</b><span class="t">Stickies sorted into themes</span></figcaption></figure><figure class="shot" id="s-tableau-comments"><button class="shot-img" type="button" data-full="shots/tableau-comments.webp" data-prod="Tableau" data-cap="The comments pane on a published dashboard. A comment carries a snapshot of the filtered view it refers to." data-detail="The comment carries a snapshot of the filtered view it refers to." data-src="https://help.tableau.com/current/pro/desktop/en-us/comment.htm" data-stype="Tableau help screenshot" aria-label="Enlarge: Tableau, Comment with a view snapshot"><img src="shots/tableau-comments.webp" width="545" height="538" loading="lazy" alt="The comments pane on a published dashboard. A comment carries a snapshot of the filtered view it refers to."></button><figcaption><b>Tableau</b><span class="t">Comment with a view snapshot</span></figcaption></figure></div>
+    </article>
+    <article class="pat" id="p-ask">
+      <div class="pat-head"><span class="pat-num">U2 · Folder → workspace · CUJ U-2, U-3</span><h3>Ask the comments, with a scope</h3></div>
+      <div class="who">
+        <div><b>Gemini in Docs</b><span>"Summarize comments from Sarah"; "what's unresolved?" (Jul 2026).</span> <a class="src" href="https://workspaceupdates.googleblog.com/2026/07/streamline-collaboration-in-google-docs-with-Gemini-powered-comment-workflows.html">announcement</a></div>
+        <div><b>Drive Catch me up</b><span>Changes and comments across files since your last visit.</span> <a class="src" href="https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html">announcement</a></div>
+        <div><b>Productboard Spark</b><span>Themes with note and customer counts.</span> <a class="src" href="https://support.productboard.com/hc/en-us/articles/360060759874-Productboard-Release-Notes">notes</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-gdocs-summary"><button class="shot-img" type="button" data-full="shots/gdocs-summary.webp" data-prod="Google Docs · Gemini" data-cap="A user asks Gemini in the side panel which issues in the comments still need resolving. The answer groups points by theme and attributes each to a reviewer by name." data-detail="Each point names the reviewer it came from and carries a numbered reference." data-src="https://www.androidauthority.com/gemini-google-docs-comments-3692242/" data-stype="Press screenshot · Android Authority" aria-label="Enlarge: Google Docs · Gemini, &quot;Which issues still need resolving?&quot;"><img src="shots/gdocs-summary.webp" width="1130" height="675" loading="lazy" alt="A user asks Gemini in the side panel which issues in the comments still need resolving. The answer groups points by theme and attributes each to a reviewer by name."></button><figcaption><b>Google Docs · Gemini</b><span class="t">&quot;Which issues still need resolving?&quot;</span></figcaption></figure><figure class="shot" id="s-drive-catchup"><button class="shot-img" type="button" data-full="shots/drive-catchup.webp" data-prod="Google Drive · Catch me up" data-cap="Clicking &quot;Catch me up&quot; on Drive home opens a Gemini panel that summarizes what changed across files since yesterday, including decisions and open questions." data-detail="Suggested follow-up prompts appear under the summary." data-src="https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html" data-stype="Frame from Google announcement GIF" aria-label="Enlarge: Google Drive · Catch me up, Catch me up across Drive"><img src="shots/drive-catchup.webp" width="1600" height="976" loading="lazy" alt="Clicking &quot;Catch me up&quot; on Drive home opens a Gemini panel that summarizes what changed across files since yesterday, including decisions and open questions."></button><figcaption><b>Google Drive · Catch me up</b><span class="t">Catch me up across Drive</span></figcaption></figure><figure class="shot" id="s-drive-badge"><button class="shot-img" type="button" data-full="shots/drive-badge.webp" data-prod="Google Drive · Catch me up" data-cap="A sparkle badge next to a file name means it has new changes or comments since your last visit. Clicking it summarizes that file." data-detail="Unread state shows per file in the list, before opening anything." data-src="https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html" data-stype="Google announcement GIF" aria-label="Enlarge: Google Drive · Catch me up, Per-file &quot;what&#x27;s new&quot; badge"><img src="shots/drive-badge.webp" width="1136" height="694" loading="lazy" alt="A sparkle badge next to a file name means it has new changes or comments since your last visit. Clicking it summarizes that file."></button><figcaption><b>Google Drive · Catch me up</b><span class="t">Per-file &quot;what&#x27;s new&quot; badge</span></figcaption></figure><figure class="shot" id="s-productboard-spark"><button class="shot-img" type="button" data-full="shots/productboard-spark.webp" data-prod="Productboard Spark" data-cap="A proactive Spark card: &quot;Spark has something for you…&quot; with an Opportunity theme backed by 89 notes from 12 customers." data-detail="The theme shows its evidence count: 89 notes from 12 customers." data-src="https://www.productboard.com/blog/productboard-spark-ai-customer-feedback-analysis/" data-stype="Productboard blog image" aria-label="Enlarge: Productboard Spark, Theme backed by 89 notes"><img src="shots/productboard-spark.webp" width="288" height="384" loading="lazy" alt="A proactive Spark card: &quot;Spark has something for you…&quot; with an Opportunity theme backed by 89 notes from 12 customers."></button><figcaption><b>Productboard Spark</b><span class="t">Theme backed by 89 notes</span></figcaption></figure></div>
+    </article>
+    <div class="pager"><a href="#overview">← Overview</a><a class="next" href="#act">Act →</a></div>
+  </div>
+
+  <!-- ACT -->
+  <div class="subpanel sp-a" id="act">
+    <div class="p-hero">
+      <span class="kick">Pillar 2 · Act</span>
+      <h2>Turn comments into changes, in bulk</h2>
+      <div class="p-strip"><span class="stage"><span class="meter"><b class="on"></b><b class="on"></b><b></b></span>Emerging</span><span class="stage">10 products · 14 screenshots</span></div>
+      <div class="cujs">
+        <div class="cuj"><span>CUJ A-1</span>"Hand these comments to an agent to fix."</div>
+        <div class="cuj"><span>CUJ A-2</span>"Apply all the suggestions at once, keep who said what."</div>
+        <div class="cuj"><span>CUJ A-3</span>"Route every piece of feedback to the right owner."</div>
+      </div>
+    </div>
+    <article class="pat" id="p-delegate">
+      <div class="pat-head"><span class="pat-num">A1 · Thread → artifact · CUJ A-1</span><h3>Delegate a comment to an agent</h3></div>
+      <div class="who">
+        <div><b>GitHub Copilot</b><span>"Fix with Copilot" on review comments, incl. mobile.</span> <a class="src" href="https://github.blog/changelog/2026-07-17-github-mobile-fix-pull-request-comments-with-copilot-cloud-agent/">changelog</a></div>
+        <div><b>Cursor Bugbot</b><span>Autofix prepares the fix; you click Create PR.</span> <a class="src" href="https://cursor.com/docs/bugbot">docs</a></div>
+        <div><b>Gemini in Docs</b><span>Drafts replies, comments and edits from feedback.</span> <a class="src" href="https://www.androidauthority.com/gemini-google-docs-comments-3692242/">source</a></div>
+        <div><b>Vercel</b><span>CLI lists, replies to, resolves comments; JSON for agents.</span> <a class="src" href="https://vercel.com/changelog/manage-vercel-toolbar-comments-from-the-cli">changelog</a></div>
+        <div><b>Notion agents</b><span>Trigger on a new comment or an @mention.</span> <a class="src" href="https://www.notion.com/help/custom-agents">docs</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-copilot-fix-mobile"><button class="shot-img" type="button" data-full="shots/copilot-fix-mobile.webp" data-prod="GitHub Mobile · Copilot" data-cap="&quot;Copilot&#x27;s findings&quot; on a PR in GitHub Mobile, with a Fix with Copilot button that hands the comments to the cloud agent." data-detail="The Fix with Copilot button sits directly under the findings summary." data-src="https://github.blog/changelog/2026-07-17-github-mobile-fix-pull-request-comments-with-copilot-cloud-agent/" data-stype="GitHub changelog image" aria-label="Enlarge: GitHub Mobile · Copilot, Fix with Copilot, on mobile"><img src="shots/copilot-fix-mobile.webp" width="1800" height="955" loading="lazy" alt="&quot;Copilot&#x27;s findings&quot; on a PR in GitHub Mobile, with a Fix with Copilot button that hands the comments to the cloud agent."></button><figcaption><b>GitHub Mobile · Copilot</b><span class="t">Fix with Copilot, on mobile</span></figcaption></figure><figure class="shot" id="s-bugbot-autofix"><button class="shot-img" type="button" data-full="shots/bugbot-autofix.webp" data-prod="Cursor · Bugbot Autofix" data-cap="Bugbot reports it found an issue and that Autofix already prepared a fix, with Create PR, a push command and a preview." data-detail="The fix exists before anyone asks; the person chooses Create PR or push." data-src="https://cursor.com/docs/bugbot" data-stype="Cursor docs screenshot" aria-label="Enlarge: Cursor · Bugbot Autofix, Fix ready before you ask"><img src="shots/bugbot-autofix.webp" width="1788" height="1114" loading="lazy" alt="Bugbot reports it found an issue and that Autofix already prepared a fix, with Create PR, a push command and a preview."></button><figcaption><b>Cursor · Bugbot Autofix</b><span class="t">Fix ready before you ask</span></figcaption></figure><figure class="shot" id="s-gdocs-draft-changes"><button class="shot-img" type="button" data-full="shots/gdocs-draft-changes.webp" data-prod="Google Docs · Gemini" data-cap="Gemini rewrites a paragraph to address reviewer comments, shown as tracked changes with Accept all and Reject all." data-detail="Edits appear as tracked changes; Accept all and Reject all act on the whole set." data-src="https://www.androidauthority.com/gemini-google-docs-comments-3692242/" data-stype="Press screenshot · Android Authority" aria-label="Enlarge: Google Docs · Gemini, Edits drafted from comments"><img src="shots/gdocs-draft-changes.webp" width="1130" height="675" loading="lazy" alt="Gemini rewrites a paragraph to address reviewer comments, shown as tracked changes with Accept all and Reject all."></button><figcaption><b>Google Docs · Gemini</b><span class="t">Edits drafted from comments</span></figcaption></figure><figure class="shot" id="s-gdocs-ai-comments"><button class="shot-img" type="button" data-full="shots/gdocs-ai-comments.webp" data-prod="Google Docs · Gemini" data-cap="Gemini drafts a comment for the user to post (&quot;AI comments 1 of 2&quot;), shown in the normal comment rail with Cancel and Comment buttons." data-detail="AI-drafted comments are paged (&quot;1 of 2&quot;) and only post when the user clicks Comment." data-src="https://www.androidauthority.com/gemini-google-docs-comments-3692242/" data-stype="Press screenshot · Android Authority" aria-label="Enlarge: Google Docs · Gemini, AI drafts, you post"><img src="shots/gdocs-ai-comments.webp" width="1130" height="675" loading="lazy" alt="Gemini drafts a comment for the user to post (&quot;AI comments 1 of 2&quot;), shown in the normal comment rail with Cancel and Comment buttons."></button><figcaption><b>Google Docs · Gemini</b><span class="t">AI drafts, you post</span></figcaption></figure><figure class="shot" id="s-gdocs-video"><button class="shot-img" type="button" data-full="shots/gdocs-video.webp" data-prod="Google Docs · Gemini" data-cap="From Google&#x27;s launch video: Gemini replying inside open comment threads next to a chart in a Doc." data-detail="Replies are drafted inside the existing comment threads." data-src="https://www.youtube.com/watch?v=DQ7A6PQayXA" data-stype="Video thumbnail · Google Workspace" aria-label="Enlarge: Google Docs · Gemini, Replies drafted in threads"><img src="shots/gdocs-video.webp" width="1280" height="720" loading="lazy" alt="From Google&#x27;s launch video: Gemini replying inside open comment threads next to a chart in a Doc."></button><figcaption><b>Google Docs · Gemini</b><span class="t">Replies drafted in threads</span></figcaption></figure><figure class="shot" id="s-vercel-cli"><button class="shot-img" type="button" data-full="shots/vercel-cli.webp" data-prod="Vercel · comments CLI" data-cap="&quot;vercel comments&quot; lists unresolved preview comments for the branch; &quot;inspect&quot; shows the thread with the exact DOM element it was pinned to." data-detail="Output includes the DOM element each comment was pinned to." data-src="https://vercel.com/changelog/manage-vercel-toolbar-comments-from-the-cli" data-stype="Vercel changelog image" aria-label="Enlarge: Vercel · comments CLI, Comments as CLI and JSON"><img src="shots/vercel-cli.webp" width="1800" height="1170" loading="lazy" alt="&quot;vercel comments&quot; lists unresolved preview comments for the branch; &quot;inspect&quot; shows the thread with the exact DOM element it was pinned to."></button><figcaption><b>Vercel · comments CLI</b><span class="t">Comments as CLI and JSON</span></figcaption></figure></div>
+    </article>
+    <article class="pat" id="p-batch">
+      <div class="pat-head"><span class="pat-num">A2 · Artifact · CUJ A-2</span><h3>Batch apply and batch resolve</h3></div>
+      <div class="who">
+        <div><b>GitHub</b><span>Batch suggestions → one commit; all suggesters co-author.</span> <a class="src" href="https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/incorporating-feedback-in-your-pull-request">docs</a></div>
+        <div><b>Cursor Bugbot</b><span>"Fix All" applies many fixes at once.</span> <a class="src" href="https://cursor.com/changelog/04-08-26">changelog</a></div>
+        <div><b>CodeRabbit</b><span>One command resolves all its comments.</span> <a class="src" href="https://github.com/coderabbitai/coderabbit-docs/pull/462">commands</a></div>
+        <div><b>Confluence</b><span>Mark all read, mark all resolved.</span> <a class="src" href="https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/">help</a></div>
+        <div><b>Frame.io</b><span>Exports only the filtered comments.</span> <a class="src" href="https://help.frame.io/en/articles/9105278-comments-panel-overview">help</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-github-batch"><button class="shot-img" type="button" data-full="shots/github-batch.webp" data-prod="GitHub" data-cap="A suggested change in a review comment with &quot;Commit suggestion&quot; and &quot;Add suggestion to batch&quot;." data-detail="Batched suggestions become one commit with each suggester as co-author." data-src="https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/incorporating-feedback-in-your-pull-request" data-stype="GitHub docs screenshot" aria-label="Enlarge: GitHub, Add suggestion to batch"><img src="shots/github-batch.webp" width="1590" height="524" loading="lazy" alt="A suggested change in a review comment with &quot;Commit suggestion&quot; and &quot;Add suggestion to batch&quot;."></button><figcaption><b>GitHub</b><span class="t">Add suggestion to batch</span></figcaption></figure><figure class="shot" id="s-copilot-review-comment"><button class="shot-img" type="button" data-full="shots/copilot-review-comment.webp" data-prod="GitHub · Copilot code review" data-cap="A Copilot review comment flagged High, with a suggested changeset and Apply suggestion / Add suggestion to batch." data-detail="AI comments use the same Apply / Add to batch controls as human suggestions, plus a severity tag." data-src="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-code-review" data-stype="GitHub docs screenshot" aria-label="Enlarge: GitHub · Copilot code review, AI comment, same batch controls"><img src="shots/copilot-review-comment.webp" width="1600" height="1436" loading="lazy" alt="A Copilot review comment flagged High, with a suggested changeset and Apply suggestion / Add suggestion to batch."></button><figcaption><b>GitHub · Copilot code review</b><span class="t">AI comment, same batch controls</span></figcaption></figure><figure class="shot" id="s-confluence-filters"><button class="shot-img" type="button" data-full="shots/confluence-filters.webp" data-prod="Confluence" data-cap="The comments panel filter menu: Open, Unread, Resolved, sort order, inline vs. all comments, plus &quot;Mark all as read&quot; and &quot;Mark all as resolved&quot;." data-detail="Bulk actions (mark all read, mark all resolved) sit in the same menu as the filters." data-src="https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/" data-stype="Atlassian help screenshot" aria-label="Enlarge: Confluence, Filters + mark all resolved"><img src="shots/confluence-filters.webp" width="459" height="720" loading="lazy" alt="The comments panel filter menu: Open, Unread, Resolved, sort order, inline vs. all comments, plus &quot;Mark all as read&quot; and &quot;Mark all as resolved&quot;."></button><figcaption><b>Confluence</b><span class="t">Filters + mark all resolved</span></figcaption></figure><figure class="shot" id="s-frameio-filters"><button class="shot-img" type="button" data-full="shots/frameio-filters.webp" data-prod="Frame.io" data-cap="Comment filters for annotations, attachments, completed/incomplete, unread, mentions, hashtag and person." data-detail="Hashtag and Person are filter dimensions alongside status." data-src="https://help.frame.io/en/articles/9105278-comments-panel-overview" data-stype="Frame.io help screenshot" aria-label="Enlarge: Frame.io, Filter by person, hashtag, status"><img src="shots/frameio-filters.webp" width="466" height="754" loading="lazy" alt="Comment filters for annotations, attachments, completed/incomplete, unread, mentions, hashtag and person."></button><figcaption><b>Frame.io</b><span class="t">Filter by person, hashtag, status</span></figcaption></figure><figure class="shot" id="s-frameio-export"><button class="shot-img" type="button" data-full="shots/frameio-export.webp" data-prod="Frame.io" data-cap="Copy, print or export comments to editing tools (FCP, Premiere, Resolve) or CSV/TXT. The note reads: &quot;Only visible comments, including filtered and searched, will be copied and exported.&quot;" data-detail="The menu states that only visible (filtered or searched) comments are copied and exported." data-src="https://help.frame.io/en/articles/9105278-comments-panel-overview" data-stype="Frame.io help screenshot" aria-label="Enlarge: Frame.io, Export only what&#x27;s filtered"><img src="shots/frameio-export.webp" width="742" height="590" loading="lazy" alt="Copy, print or export comments to editing tools (FCP, Premiere, Resolve) or CSV/TXT. The note reads: &quot;Only visible comments, including filtered and searched, will be copied and exported.&quot;"></button><figcaption><b>Frame.io</b><span class="t">Export only what&#x27;s filtered</span></figcaption></figure></div>
+    </article>
+    <article class="pat" id="p-triage">
+      <div class="pat-head"><span class="pat-num">A3 · Team inbox · CUJ A-3</span><h3>Triage inbox with AI suggestions</h3></div>
+      <div class="who">
+        <div><b>Linear Triage Intelligence</b><span>Suggests owner, labels, duplicates, with reasons; kept visually apart from human values.</span> <a class="src" href="https://linear.app/now/how-we-built-triage-intelligence">write-up</a></div>
+        <div><b>Linear rules</b><span>Fixed rules run after the AI.</span> <a class="src" href="https://linear.app/now/cx-in-linear">source</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-linear-inbox"><button class="shot-img" type="button" data-full="shots/linear-inbox.webp" data-prod="Linear · Triage" data-cap="The Triage inbox, where unplanned work from Intercom, Sentry and people lands in one queue." data-detail="Items from Intercom, Sentry and people share one queue." data-src="https://linear.app/docs/triage" data-stype="Linear docs screenshot" aria-label="Enlarge: Linear · Triage, One triage inbox"><img src="shots/linear-inbox.webp" width="1440" height="999" loading="lazy" alt="The Triage inbox, where unplanned work from Intercom, Sentry and people lands in one queue."></button><figcaption><b>Linear · Triage</b><span class="t">One triage inbox</span></figcaption></figure><figure class="shot" id="s-linear-triage-intel"><button class="shot-img" type="button" data-full="shots/linear-triage-intel.webp" data-prod="Linear · Triage Intelligence" data-cap="Suggestions for assignee, project and label, plus &quot;Duplicate of&quot; and &quot;Related to&quot; links." data-detail="Suggestions sit in their own module, apart from fields set by people." data-src="https://linear.app/now/cx-in-linear" data-stype="Linear blog screenshot" aria-label="Enlarge: Linear · Triage Intelligence, AI suggestions in their own module"><img src="shots/linear-triage-intel.webp" width="1800" height="543" loading="lazy" alt="Suggestions for assignee, project and label, plus &quot;Duplicate of&quot; and &quot;Related to&quot; links."></button><figcaption><b>Linear · Triage Intelligence</b><span class="t">AI suggestions in their own module</span></figcaption></figure><figure class="shot" id="s-linear-rule"><button class="shot-img" type="button" data-full="shots/linear-rule.webp" data-prod="Linear · Triage rules" data-cap="A deterministic rule that runs after the AI: When customer tier includes Enterprise, set priority to Urgent." data-detail="Rules run after Triage Intelligence has made its suggestions." data-src="https://linear.app/now/cx-in-linear" data-stype="Linear blog screenshot" aria-label="Enlarge: Linear · Triage rules, Rule runs after the AI"><img src="shots/linear-rule.webp" width="1800" height="476" loading="lazy" alt="A deterministic rule that runs after the AI: When customer tier includes Enterprise, set priority to Urgent."></button><figcaption><b>Linear · Triage rules</b><span class="t">Rule runs after the AI</span></figcaption></figure></div>
+    </article>
+    <div class="pager"><a href="#understand">← Understand</a><a class="next" href="#learn">Learn →</a></div>
+  </div>
+
+  <!-- LEARN -->
+  <div class="subpanel sp-l" id="learn">
+    <div class="p-hero">
+      <span class="kick">Pillar 3 · Learn</span>
+      <h2>Turn comments into context for future work</h2>
+      <div class="p-strip"><span class="stage"><span class="meter"><b class="on"></b><b></b><b></b></span>Frontier</span><span class="stage">10 products · 25 screenshots</span></div>
+      <div class="cujs">
+        <div class="cuj"><span>CUJ L-1</span>"Stop me leaving the same comment every week."</div>
+        <div class="cuj"><span>CUJ L-2</span>"Show where our data agent went wrong, and fix its context."</div>
+        <div class="cuj"><span>CUJ L-3</span>"Have experts grade answers so we can measure quality."</div>
+      </div>
+    </div>
+    <article class="pat" id="p-rule">
+      <div class="pat-head"><span class="pat-num">L1 · Repo → org · CUJ L-1</span><h3>Promote a comment into a rule</h3></div>
+      <div class="who">
+        <div><b>CodeRabbit</b><span>Learnings from chat; repo or org scope; usage counts.</span> <a class="src" href="https://docs.coderabbit.ai/knowledge-base/learnings">docs</a></div>
+        <div><b>Cursor Bugbot</b><span>Rules from reactions and replies; auto-promote and disable. 110k+ repos, 44k+ rules.</span> <a class="src" href="https://cursor.com/blog/bugbot-learning">blog</a></div>
+        <div><b>Linear</b><span>Plain-language workspace guidance for triage.</span> <a class="src" href="https://linear.app/now/how-we-built-triage-intelligence">blog</a></div>
+        <div><b>ThoughtSpot</b><span>Coaching saves reference questions and business terms.</span> <a class="src" href="https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps">docs</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-coderabbit-learning"><button class="shot-img" type="button" data-full="shots/coderabbit-learning.webp" data-prod="CodeRabbit · Learnings" data-cap="A maintainer corrects CodeRabbit in a PR thread. CodeRabbit replies and adds a Learning, recording who it learned from, the PR, file, timestamp and the rule." data-detail="Each learning records who it came from, the PR, file and lines, and when." data-src="https://docs.coderabbit.ai/knowledge-base/learnings" data-stype="CodeRabbit docs screenshot" aria-label="Enlarge: CodeRabbit · Learnings, Learning created from a reply"><img src="shots/coderabbit-learning.webp" width="1800" height="902" loading="lazy" alt="A maintainer corrects CodeRabbit in a PR thread. CodeRabbit replies and adds a Learning, recording who it learned from, the PR, file, timestamp and the rule."></button><figcaption><b>CodeRabbit · Learnings</b><span class="t">Learning created from a reply</span></figcaption></figure><figure class="shot" id="s-coderabbit-dashboard"><button class="shot-img" type="button" data-full="shots/coderabbit-dashboard.webp" data-prod="CodeRabbit · Learnings" data-cap="The Learnings dashboard: totals, active in 30 days, never used, with usage counts and last-used dates per learning, plus CSV export." data-detail="Each learning shows a usage count and last-used date; the header counts &quot;never used&quot;." data-src="https://docs.coderabbit.ai/knowledge-base/learnings" data-stype="CodeRabbit docs screenshot" aria-label="Enlarge: CodeRabbit · Learnings, Learnings with usage counts"><img src="shots/coderabbit-dashboard.webp" width="1800" height="692" loading="lazy" alt="The Learnings dashboard: totals, active in 30 days, never used, with usage counts and last-used dates per learning, plus CSV export."></button><figcaption><b>CodeRabbit · Learnings</b><span class="t">Learnings with usage counts</span></figcaption></figure><figure class="shot" id="s-bugbot-rule"><button class="shot-img" type="button" data-full="shots/bugbot-rule.webp" data-prod="Cursor · Bugbot learned rules" data-cap="A learned rule (&quot;New Datadog service monitors must be owned by the service team&quot;), tagged Learned Rule, with an Enabled toggle and editable content." data-detail="Rules are tagged Learned Rule, have an Enabled toggle and editable text." data-src="https://cursor.com/changelog/04-08-26" data-stype="Cursor changelog image" aria-label="Enlarge: Cursor · Bugbot learned rules, Editable learned rule"><img src="shots/bugbot-rule.webp" width="1770" height="766" loading="lazy" alt="A learned rule (&quot;New Datadog service monitors must be owned by the service team&quot;), tagged Learned Rule, with an Enabled toggle and editable content."></button><figcaption><b>Cursor · Bugbot learned rules</b><span class="t">Editable learned rule</span></figcaption></figure><figure class="shot" id="s-bugbot-loop"><button class="shot-img" type="button" data-full="shots/bugbot-loop.webp" data-prod="Cursor · Bugbot" data-cap="Bugbot&#x27;s learning loop: emoji reactions, replies and PR comments feed candidate rules that get created, promoted or disabled across repo and team scopes." data-detail="Inputs include emoji reactions, replies and PR comments." data-src="https://cursor.com/blog/bugbot-learning" data-stype="Cursor blog diagram" aria-label="Enlarge: Cursor · Bugbot, Reactions become candidate rules"><img src="shots/bugbot-loop.webp" width="1800" height="1012" loading="lazy" alt="Bugbot&#x27;s learning loop: emoji reactions, replies and PR comments feed candidate rules that get created, promoted or disabled across repo and team scopes."></button><figcaption><b>Cursor · Bugbot</b><span class="t">Reactions become candidate rules</span></figcaption></figure><figure class="shot" id="s-bugbot-chart"><button class="shot-img" type="button" data-full="shots/bugbot-chart.webp" data-prod="Cursor · Bugbot" data-cap="Cursor&#x27;s chart of resolution rate (share of flagged bugs fixed by merge) climbing from Aug 2025 to Apr 2026 while bugs found per run also went up. Cursor reports 52% at launch and 78% now." data-detail="Cursor uses resolution rate as the outcome metric for learning." data-src="https://cursor.com/blog/bugbot-learning" data-stype="Cursor blog chart" aria-label="Enlarge: Cursor · Bugbot, Resolution rate 52% → 78%"><img src="shots/bugbot-chart.webp" width="1800" height="1427" loading="lazy" alt="Cursor&#x27;s chart of resolution rate (share of flagged bugs fixed by merge) climbing from Aug 2025 to Apr 2026 while bugs found per run also went up. Cursor reports 52% at launch and 78% now."></button><figcaption><b>Cursor · Bugbot</b><span class="t">Resolution rate 52% → 78%</span></figcaption></figure><figure class="shot" id="s-linear-guidance"><button class="shot-img" type="button" data-full="shots/linear-guidance.webp" data-prod="Linear · Triage Intelligence" data-cap="&quot;Additional guidance&quot;: plain-language rules that steer triage suggestions, e.g. &quot;All billing-related issues should use the Stripe label.&quot;" data-detail="Guidance is plain-language text at the workspace level." data-src="https://linear.app/now/how-we-built-triage-intelligence" data-stype="Linear blog screenshot" aria-label="Enlarge: Linear · Triage Intelligence, Workspace guidance, plain words"><img src="shots/linear-guidance.webp" width="1800" height="1018" loading="lazy" alt="&quot;Additional guidance&quot;: plain-language rules that steer triage suggestions, e.g. &quot;All billing-related issues should use the Stripe label.&quot;"></button><figcaption><b>Linear · Triage Intelligence</b><span class="t">Workspace guidance, plain words</span></figcaption></figure><figure class="shot" id="s-spotter-review-terms"><button class="shot-img" type="button" data-full="shots/spotter-review-terms.webp" data-prod="ThoughtSpot · Coach Spotter" data-cap="Review business terms: each phrase in a question is mapped to search tokens, with approve and reject controls per mapping." data-detail="Each phrase-to-token mapping is approved or rejected on its own." data-src="https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps" data-stype="ThoughtSpot docs screenshot" aria-label="Enlarge: ThoughtSpot · Coach Spotter, Approve each term mapping"><img src="shots/spotter-review-terms.webp" width="1800" height="458" loading="lazy" alt="Review business terms: each phrase in a question is mapped to search tokens, with approve and reject controls per mapping."></button><figcaption><b>ThoughtSpot · Coach Spotter</b><span class="t">Approve each term mapping</span></figcaption></figure><figure class="shot" id="s-spotter-fix-term"><button class="shot-img" type="button" data-full="shots/spotter-fix-term.webp" data-prod="ThoughtSpot · Coach Spotter" data-cap="Fix business term: &quot;revenue&quot; mapped to Amount booked in the Salesforce model." data-detail="The correction is saved as a business term in the model." data-src="https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps" data-stype="ThoughtSpot docs screenshot" aria-label="Enlarge: ThoughtSpot · Coach Spotter, Correction saved as a term"><img src="shots/spotter-fix-term.webp" width="611" height="302" loading="lazy" alt="Fix business term: &quot;revenue&quot; mapped to Amount booked in the Salesforce model."></button><figcaption><b>ThoughtSpot · Coach Spotter</b><span class="t">Correction saved as a term</span></figcaption></figure></div>
+    </article>
+    <article class="pat" id="p-review">
+      <div class="pat-head"><span class="pat-num">L2 · Space → workspace · CUJ L-2</span><h3>Review agent → suggestion feed</h3></div>
+      <div class="who">
+        <div><b>Hex</b><span>Review Agent → suggestion → diff → preview → publish.</span> <a class="src" href="https://hex.tech/blog/introducing-context-suggestions/">blog</a></div>
+        <div><b>Databricks Genie</b><span>Monitor tab, weekly digest, "Analyze Space Usage", benchmarks.</span> <a class="src" href="https://docs.databricks.com/aws/en/genie-agents/monitor">docs</a></div>
+        <div><b>Snowflake Cortex</b><span>Up to 10 verified-query suggestions from usage. No screenshot found.</span> <a class="src" href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst/verified-query-suggestions">docs</a></div>
+        <div><b>Looker</b><span>Traces and feedback; manual instructions and golden queries.</span> <a class="src" href="https://docs.cloud.google.com/looker/docs/conversational-analytics-looker-rollout">docs</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-hex-loop"><button class="shot-img" type="button" data-full="shots/hex-loop.webp" data-prod="Hex · architecture" data-cap="Hex&#x27;s diagram: threads, notebooks, Slack/MCP feed Context Studio, where a Review Agent produces suggestions that update workspace context." data-detail="A Review Agent sits between thread observability and context updates." data-src="https://hex.tech/blog/introducing-context-suggestions/" data-stype="Hex blog diagram" aria-label="Enlarge: Hex · architecture, The Review Agent loop"><img src="shots/hex-loop.webp" width="740" height="411" loading="lazy" alt="Hex&#x27;s diagram: threads, notebooks, Slack/MCP feed Context Studio, where a Review Agent produces suggestions that update workspace context."></button><figcaption><b>Hex · architecture</b><span class="t">The Review Agent loop</span></figcaption></figure><figure class="shot" id="s-hex-dashboard"><button class="shot-img" type="button" data-full="shots/hex-dashboard.webp" data-prod="Hex · Context Studio" data-cap="Context Studio overview: conversations, users and warnings over time, top conversation topics, and a table of threads with flags like Missing context and User doubt." data-detail="Warnings are charted against conversation topics." data-src="https://learn.hex.tech/docs/agent-management/observability" data-stype="Hex docs screenshot" aria-label="Enlarge: Hex · Context Studio, Usage, topics, warnings"><img src="shots/hex-dashboard.webp" width="1423" height="708" loading="lazy" alt="Context Studio overview: conversations, users and warnings over time, top conversation topics, and a table of threads with flags like Missing context and User doubt."></button><figcaption><b>Hex · Context Studio</b><span class="t">Usage, topics, warnings</span></figcaption></figure><figure class="shot" id="s-hex-warning"><button class="shot-img" type="button" data-full="shots/hex-warning.webp" data-prod="Hex · Warnings" data-cap="A User doubt warning (&quot;User pushed back on how the agent segmented customers…&quot;) with &quot;Fix with Suggestion: Clarify customer sector segments&quot;." data-detail="The warning links straight to a suggested fix." data-src="https://hex.tech/blog/introducing-context-suggestions/" data-stype="Hex blog image" aria-label="Enlarge: Hex · Warnings, Warning → suggested fix"><img src="shots/hex-warning.webp" width="740" height="416" loading="lazy" alt="A User doubt warning (&quot;User pushed back on how the agent segmented customers…&quot;) with &quot;Fix with Suggestion: Clarify customer sector segments&quot;."></button><figcaption><b>Hex · Warnings</b><span class="t">Warning → suggested fix</span></figcaption></figure><figure class="shot" id="s-hex-suggestions"><button class="shot-img" type="button" data-full="shots/hex-suggestions.webp" data-prod="Hex · Context Suggestions" data-cap="The Suggestions feed in Context Studio: drafted context changes such as Define B2B account reporting rules and Clarify fiscal calendar conventions, each with an evidence count." data-detail="Suggestions are listed as rows with a status (Open) and age." data-src="https://hex.tech/blog/introducing-context-suggestions/" data-stype="Frame from Hex blog video" aria-label="Enlarge: Hex · Context Suggestions, Suggestion feed"><img src="shots/hex-suggestions.webp" width="1800" height="854" loading="lazy" alt="The Suggestions feed in Context Studio: drafted context changes such as Define B2B account reporting rules and Clarify fiscal calendar conventions, each with an evidence count."></button><figcaption><b>Hex · Context Suggestions</b><span class="t">Suggestion feed</span></figcaption></figure><figure class="shot" id="s-hex-diff"><button class="shot-img" type="button" data-full="shots/hex-diff.webp" data-prod="Hex · Context Suggestions" data-cap="An accepted suggestion shown as a diff to a workspace guide (fiscal year logic), with Reject and Publish per file." data-detail="Each changed guide file has its own Reject and Publish." data-src="https://hex.tech/blog/introducing-context-suggestions/" data-stype="Frame from Hex blog video" aria-label="Enlarge: Hex · Context Suggestions, Context change as a diff"><img src="shots/hex-diff.webp" width="1800" height="854" loading="lazy" alt="An accepted suggestion shown as a diff to a workspace guide (fiscal year logic), with Reject and Publish per file."></button><figcaption><b>Hex · Context Suggestions</b><span class="t">Context change as a diff</span></figcaption></figure><figure class="shot" id="s-hex-preview"><button class="shot-img" type="button" data-full="shots/hex-preview.webp" data-prod="Hex · Publishing" data-cap="Before publishing, a Thread Preview runs a test question (&quot;When does our fiscal calendar start?&quot;) against the staged changes." data-detail="A test question runs against staged changes before publishing." data-src="https://hex.tech/blog/introducing-context-studio/" data-stype="Frame from Hex blog video" aria-label="Enlarge: Hex · Publishing, Test before publish"><img src="shots/hex-preview.webp" width="1800" height="936" loading="lazy" alt="Before publishing, a Thread Preview runs a test question (&quot;When does our fiscal calendar start?&quot;) against the staged changes."></button><figcaption><b>Hex · Publishing</b><span class="t">Test before publish</span></figcaption></figure><figure class="shot" id="s-hex-topics"><button class="shot-img" type="button" data-full="shots/hex-topics.webp" data-prod="Hex · Context Studio" data-cap="Threads listed with user, role, prompt and an AI-extracted topic." data-detail="Each thread gets an AI-extracted topic." data-src="https://learn.hex.tech/docs/agent-management/observability" data-stype="Hex docs screenshot" aria-label="Enlarge: Hex · Context Studio, Threads tagged by topic"><img src="shots/hex-topics.webp" width="1042" height="284" loading="lazy" alt="Threads listed with user, role, prompt and an AI-extracted topic."></button><figcaption><b>Hex · Context Studio</b><span class="t">Threads tagged by topic</span></figcaption></figure><figure class="shot" id="s-hex-inspector"><button class="shot-img" type="button" data-full="shots/hex-inspector.webp" data-prod="Hex · Thread Inspector" data-cap="The read-only Thread Inspector: the agent&#x27;s reasoning and table, plus a summary panel of what happened." data-detail="The inspector is read-only for admins." data-src="https://learn.hex.tech/docs/agent-management/observability" data-stype="Hex docs screenshot" aria-label="Enlarge: Hex · Thread Inspector, Read-only thread inspector"><img src="shots/hex-inspector.webp" width="1421" height="605" loading="lazy" alt="The read-only Thread Inspector: the agent&#x27;s reasoning and table, plus a summary panel of what happened."></button><figcaption><b>Hex · Thread Inspector</b><span class="t">Read-only thread inspector</span></figcaption></figure><figure class="shot" id="s-genie-monitor"><button class="shot-img" type="button" data-full="shots/genie-monitor.webp" data-prod="Databricks Genie · Monitor" data-cap="The Monitor tab: every question with its rating, review request, comment and user, filterable by time, conversation type, rating and status." data-detail="Ratings, review requests and comments are columns in one filterable table." data-src="https://docs.databricks.com/aws/en/genie-agents/monitor" data-stype="Databricks docs screenshot" aria-label="Enlarge: Databricks Genie · Monitor, Every question, rating, comment"><img src="shots/genie-monitor.webp" width="1000" height="289" loading="lazy" alt="The Monitor tab: every question with its rating, review request, comment and user, filterable by time, conversation type, rating and status."></button><figcaption><b>Databricks Genie · Monitor</b><span class="t">Every question, rating, comment</span></figcaption></figure><figure class="shot" id="s-genie-digest"><button class="shot-img" type="button" data-full="shots/genie-digest.webp" data-prod="Databricks Genie · Weekly digest" data-cap="Weekly digest of questions, users, thumbs up and down, with the Analyze Space Usage button that launches an agent review." data-detail="&quot;Analyze Space Usage&quot; launches an agent review of the week." data-src="https://docs.databricks.com/aws/en/genie-agents/monitor" data-stype="Databricks docs screenshot" aria-label="Enlarge: Databricks Genie · Weekly digest, Weekly digest + Analyze"><img src="shots/genie-digest.webp" width="800" height="155" loading="lazy" alt="Weekly digest of questions, users, thumbs up and down, with the Analyze Space Usage button that launches an agent review."></button><figcaption><b>Databricks Genie · Weekly digest</b><span class="t">Weekly digest + Analyze</span></figcaption></figure><figure class="shot" id="s-genie-benchmarks"><button class="shot-img" type="button" data-full="shots/genie-benchmarks.webp" data-prod="Databricks Genie · Benchmarks" data-cap="Benchmark runs with accuracy per run, and a &quot;Manual review needed&quot; status where no ground-truth SQL exists." data-detail="Runs without ground-truth SQL are marked &quot;Manual review needed&quot;." data-src="https://docs.databricks.com/aws/en/genie-agents/monitor" data-stype="Databricks docs screenshot" aria-label="Enlarge: Databricks Genie · Benchmarks, Benchmark runs"><img src="shots/genie-benchmarks.webp" width="1800" height="825" loading="lazy" alt="Benchmark runs with accuracy per run, and a &quot;Manual review needed&quot; status where no ground-truth SQL exists."></button><figcaption><b>Databricks Genie · Benchmarks</b><span class="t">Benchmark runs</span></figcaption></figure><figure class="shot" id="s-genie-eval"><button class="shot-img" type="button" data-full="shots/genie-eval.webp" data-prod="Databricks Genie · Benchmarks" data-cap="One benchmark result: model SQL next to ground-truth SQL, an assessment of Good, and Update ground truth." data-detail="Model SQL and ground-truth SQL are shown side by side." data-src="https://docs.databricks.com/aws/en/genie-agents/monitor" data-stype="Databricks docs screenshot" aria-label="Enlarge: Databricks Genie · Benchmarks, Model vs. ground-truth SQL"><img src="shots/genie-eval.webp" width="1800" height="1200" loading="lazy" alt="One benchmark result: model SQL next to ground-truth SQL, an assessment of Good, and Update ground truth."></button><figcaption><b>Databricks Genie · Benchmarks</b><span class="t">Model vs. ground-truth SQL</span></figcaption></figure></div>
+    </article>
+    <article class="pat" id="p-queue">
+      <div class="pat-head"><span class="pat-num">L3 · Org schema · CUJ L-3</span><h3>Structured review queues</h3></div>
+      <div class="who">
+        <div><b>LangSmith</b><span>Rubric queues, pairwise review, statuses, export to datasets.</span> <a class="src" href="https://docs.langchain.com/langsmith/annotation-queues">docs</a></div>
+        <div><b>MLflow</b><span>Expert labeling sessions with label schemas.</span> <a class="src" href="https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions">docs</a></div>
+      </div>
+      <div class="gal"><figure class="shot" id="s-langsmith-bulk"><button class="shot-img" type="button" data-full="shots/langsmith-bulk.webp" data-prod="LangSmith" data-cap="Select threads in bulk and add them to an annotation queue from the bottom action bar." data-detail="The selection in the threads table becomes the queue batch." data-src="https://docs.langchain.com/langsmith/annotation-queues" data-stype="LangChain docs screenshot" aria-label="Enlarge: LangSmith, Bulk add threads to a queue"><img src="shots/langsmith-bulk.webp" width="1545" height="765" loading="lazy" alt="Select threads in bulk and add them to an annotation queue from the bottom action bar."></button><figcaption><b>LangSmith</b><span class="t">Bulk add threads to a queue</span></figcaption></figure><figure class="shot" id="s-langsmith-queue"><button class="shot-img" type="button" data-full="shots/langsmith-queue.webp" data-prod="LangSmith · Annotation queue" data-cap="The queue reviewer: item list with Needs Review / Needs Others&#x27; Review / Completed, the transcript, and a rubric feedback pane." data-detail="Each item has a review status, including &quot;Needs Others&#x27; Review&quot;." data-src="https://docs.langchain.com/langsmith/annotation-queues" data-stype="LangChain docs screenshot" aria-label="Enlarge: LangSmith · Annotation queue, Rubric review queue"><img src="shots/langsmith-queue.webp" width="1482" height="910" loading="lazy" alt="The queue reviewer: item list with Needs Review / Needs Others&#x27; Review / Completed, the transcript, and a rubric feedback pane."></button><figcaption><b>LangSmith · Annotation queue</b><span class="t">Rubric review queue</span></figcaption></figure><figure class="shot" id="s-langsmith-pairwise"><button class="shot-img" type="button" data-full="shots/langsmith-pairwise.webp" data-prod="LangSmith · Pairwise queue" data-cap="Two runs side by side with A / B / Equal buttons and keyboard shortcuts." data-detail="Reviewers choose A, B or Equal, with keyboard shortcuts." data-src="https://docs.langchain.com/langsmith/annotation-queues" data-stype="LangChain docs screenshot" aria-label="Enlarge: LangSmith · Pairwise queue, A / B / Equal review"><img src="shots/langsmith-pairwise.webp" width="1800" height="1031" loading="lazy" alt="Two runs side by side with A / B / Equal buttons and keyboard shortcuts."></button><figcaption><b>LangSmith · Pairwise queue</b><span class="t">A / B / Equal review</span></figcaption></figure><figure class="shot" id="s-mlflow-session"><button class="shot-img" type="button" data-full="shots/mlflow-session.webp" data-prod="MLflow · Labeling session" data-cap="Create Labeling Session: pick a dataset, choose label schemas, and preview the questions experts will answer." data-detail="Label schemas define the questions reviewers answer." data-src="https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions" data-stype="Databricks docs screenshot" aria-label="Enlarge: MLflow · Labeling session, Labeling session setup"><img src="shots/mlflow-session.webp" width="622" height="539" loading="lazy" alt="Create Labeling Session: pick a dataset, choose label schemas, and preview the questions experts will answer."></button><figcaption><b>MLflow · Labeling session</b><span class="t">Labeling session setup</span></figcaption></figure><figure class="shot" id="s-mlflow-assess"><button class="shot-img" type="button" data-full="shots/mlflow-assess.webp" data-prod="MLflow · Assessments" data-cap="A trace with expert assessments: a No rating with written rationale, and an expected summary as ground truth." data-detail="A written rationale is stored next to the rating." data-src="https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions" data-stype="Databricks docs screenshot" aria-label="Enlarge: MLflow · Assessments, Rating + written rationale"><img src="shots/mlflow-assess.webp" width="1204" height="804" loading="lazy" alt="A trace with expert assessments: a No rating with written rationale, and an expected summary as ground truth."></button><figcaption><b>MLflow · Assessments</b><span class="t">Rating + written rationale</span></figcaption></figure></div>
+    </article>
+    <div class="pager"><a href="#act">← Act</a><a class="next" href="#data-lens">Data lens →</a></div>
+  </div>
+
+  <!-- DATA LENS -->
+  <div class="subpanel" id="data-lens">
+    <div class="p-hero">
+      <span class="kick" style="color:var(--muted)">Lens · Data analytics</span>
+      <h2>Data comments dispute meaning, so fixes go to shared context</h2>
+      <p class="lead">"Active user", "fiscal Q1", "which join": the same dispute recurs on every dashboard that uses the metric.</p>
+    </div>
+    <div class="bigfacts">
+      <div class="bf"><b>0 of 6</b><span>data products reviewed use human dashboard or notebook comments as input</span></div>
+      <div class="bf"><b>0 of 6</b><span>retire stale context automatically (Bugbot does, in code review)</span></div>
+      <div class="bf"><b>2 of 6</b><span>test a context change before it goes live (Genie benchmarks, Hex preview)</span></div>
+    </div>
+    <div class="chart" style="margin-top:40px">
+      <div class="chart-title">Feedback-to-context loop coverage</div>
+      <div class="chart-sub">Which steps each product ships · Cursor Bugbot shown for reference</div>
+      <div class="cov-wrap"><table class="lm"><thead><tr><th>Product</th><th><small class="u-ink">Understand</small>Capture</th><th><small class="u-ink">Understand</small>Cluster</th><th><small class="a-ink">Act</small>Decide</th><th><small class="l-ink">Learn</small>Apply</th><th><small class="l-ink">Learn</small>Verify</th><th><small class="l-ink">Learn</small>Retire</th></tr></thead><tbody><tr class=""><td>Hex</td><td><span class="dot f cu tip" tabindex="0" data-tip="Every Thread, Slack, MCP and notebook session" aria-label="Capture: Every Thread, Slack, MCP and notebook session"></span></td><td><span class="dot f cu tip" tabindex="0" data-tip="Topics and Review Agent problem statements" aria-label="Cluster: Topics and Review Agent problem statements"></span></td><td><span class="dot f ca tip" tabindex="0" data-tip="Data team accepts or rejects suggestions" aria-label="Decide: Data team accepts or rejects suggestions"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Publishes guides, endorsements, models" aria-label="Apply: Publishes guides, endorsements, models"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Thread Preview before publishing" aria-label="Verify: Thread Preview before publishing"></span></td><td><span class="dot n" aria-label="Retire: none found"></span></td></tr><tr class=""><td>Databricks Genie</td><td><span class="dot f cu tip" tabindex="0" data-tip="Questions, ratings, review requests" aria-label="Capture: Questions, ratings, review requests"></span></td><td><span class="dot f cu tip" tabindex="0" data-tip="Analyze Space Usage summarizes 7 days" aria-label="Cluster: Analyze Space Usage summarizes 7 days"></span></td><td><span class="dot f ca tip" tabindex="0" data-tip="Managers edit instructions" aria-label="Decide: Managers edit instructions"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Instructions, example SQL" aria-label="Apply: Instructions, example SQL"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Up to 500 benchmark questions" aria-label="Verify: Up to 500 benchmark questions"></span></td><td><span class="dot n" aria-label="Retire: none found"></span></td></tr><tr class=""><td>Snowflake Cortex</td><td><span class="dot f cu tip" tabindex="0" data-tip="Usage data and query history" aria-label="Capture: Usage data and query history"></span></td><td><span class="dot f cu tip" tabindex="0" data-tip="Groups similar unanswered questions" aria-label="Cluster: Groups similar unanswered questions"></span></td><td><span class="dot f ca tip" tabindex="0" data-tip="Human review required" aria-label="Decide: Human review required"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Verified query repository" aria-label="Apply: Verified query repository"></span></td><td><span class="dot n" aria-label="Verify: none found"></span></td><td><span class="dot n" aria-label="Retire: none found"></span></td></tr><tr class=""><td>ThoughtSpot</td><td><span class="dot f cu tip" tabindex="0" data-tip="Add to Coaching from an answer" aria-label="Capture: Add to Coaching from an answer"></span></td><td><span class="dot n" aria-label="Cluster: none found"></span></td><td><span class="dot f ca tip" tabindex="0" data-tip="Approve term mappings" aria-label="Decide: Approve term mappings"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Reference questions, business terms" aria-label="Apply: Reference questions, business terms"></span></td><td><span class="dot h cl tip" tabindex="0" data-tip="Docs recommend validating with test questions" aria-label="Verify: Docs recommend validating with test questions"></span></td><td><span class="dot n" aria-label="Retire: none found"></span></td></tr><tr class=""><td>Looker</td><td><span class="dot h cu tip" tabindex="0" data-tip="Agent traces and feedback" aria-label="Capture: Agent traces and feedback"></span></td><td><span class="dot n" aria-label="Cluster: none found"></span></td><td><span class="dot f ca tip" tabindex="0" data-tip="Admins edit" aria-label="Decide: Admins edit"></span></td><td><span class="dot h cl tip" tabindex="0" data-tip="Instructions and golden queries, by hand" aria-label="Apply: Instructions and golden queries, by hand"></span></td><td><span class="dot n" aria-label="Verify: none found"></span></td><td><span class="dot n" aria-label="Retire: none found"></span></td></tr><tr class=""><td>Tableau · Power BI</td><td><span class="dot h cu tip" tabindex="0" data-tip="Dashboard comments pane" aria-label="Capture: Dashboard comments pane"></span></td><td><span class="dot n" aria-label="Cluster: none found"></span></td><td><span class="dot n" aria-label="Decide: none found"></span></td><td><span class="dot n" aria-label="Apply: none found"></span></td><td><span class="dot n" aria-label="Verify: none found"></span></td><td><span class="dot n" aria-label="Retire: none found"></span></td></tr><tr class="ref"><td>Cursor Bugbot (code)</td><td><span class="dot f cu tip" tabindex="0" data-tip="Reactions, replies, reviewer comments" aria-label="Capture: Reactions, replies, reviewer comments"></span></td><td><span class="dot f cu tip" tabindex="0" data-tip="Candidate rules" aria-label="Cluster: Candidate rules"></span></td><td><span class="dot h ca tip" tabindex="0" data-tip="Auto-promotes on signal; editable" aria-label="Decide: Auto-promotes on signal; editable"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Learned rules" aria-label="Apply: Learned rules"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Rules evaluated against incoming PRs" aria-label="Verify: Rules evaluated against incoming PRs"></span></td><td><span class="dot f cl tip" tabindex="0" data-tip="Auto-disables rules that stop helping" aria-label="Retire: Auto-disables rules that stop helping"></span></td></tr></tbody></table></div>
+      <div class="legend"><span><span class="dot f"></span>Shipped</span><span><span class="dot h"></span>Partial or manual</span><span><span class="dot n"></span>&nbsp;None found</span></div>
+    </div>
+    <div class="pager"><a href="#learn">← Learn</a><a class="next" href="#design">3 · Principles &amp; explorations →</a></div>
+  </div>
+</div>
+
+<!-- ============ 3 DESIGN ============ -->
+<div class="panel" id="design">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">3 · Principles &amp; explorations</div><h2>What the landscape suggests</h2><p class="muted">Interpretation and early sketches. Not specs.</p></div>
+    <div class="princ">
+      <div class="sp-u"><h4><i></i>Understand</h4><ul>
+        <li><b>Keep provenance</b><span>Every summary line links to its comments.</span></li>
+        <li><b>Keep frequency</b><span>Count people per theme.</span></li>
+        <li><b>Show coverage</b><span>"Read 14 of 16 files."</span></li>
+        <li><b>Group by action</b><span>"Needs owner" beats topic.</span></li></ul></div>
+      <div class="sp-a"><h4><i></i>Act</h4><ul>
+        <li><b>Filter, then act</b><span>Show the batch before applying.</span></li>
+        <li><b>Keep attribution</b><span>Credit every commenter.</span></li>
+        <li><b>Proposed ≠ decided</b><span>AI suggestions look different.</span></li>
+        <li><b>Comments as data</b><span>API, CLI or MCP for agents.</span></li></ul></div>
+      <div class="sp-l"><h4><i></i>Learn</h4><ul>
+        <li><b>Choosable scope</b><span>Every rule says how far it reaches.</span></li>
+        <li><b>Show evidence</b><span>Which comments, how many people.</span></li>
+        <li><b>Test before apply</b><span>Preview on past questions.</span></li>
+        <li><b>Lifecycle</b><span>Candidate → promoted → retired.</span></li></ul></div>
+    </div>
+  </section>
+
+  <section class="sec" id="d-loop">
+    <div class="loopfig">
+      <svg viewBox="0 0 380 380" role="img" aria-label="6-step loop: Capture, Cluster, Decide, Apply, Verify, Retire"><circle class="lp-ring" cx="190" cy="190" r="118"/><polygon class="lp-arrow" points="-5,-6 5,0 -5,6" transform="translate(249.0,87.8) rotate(30.0)"/><polygon class="lp-arrow" points="-5,-6 5,0 -5,6" transform="translate(308.0,190.0) rotate(90.0)"/><polygon class="lp-arrow" points="-5,-6 5,0 -5,6" transform="translate(249.0,292.2) rotate(150.0)"/><polygon class="lp-arrow" points="-5,-6 5,0 -5,6" transform="translate(131.0,292.2) rotate(210.0)"/><polygon class="lp-arrow" points="-5,-6 5,0 -5,6" transform="translate(72.0,190.0) rotate(270.0)"/><polygon class="lp-arrow" points="-5,-6 5,0 -5,6" transform="translate(131.0,87.8) rotate(330.0)"/><g class="lp-node u"><circle cx="190.0" cy="72.0" r="20"/><text x="190.0" y="72.0">1</text></g><text class="lp-lab" x="190.0" y="37.0" text-anchor="middle">Capture</text><g class="lp-node u"><circle cx="292.2" cy="131.0" r="20"/><text x="292.2" y="131.0">2</text></g><text class="lp-lab" x="318.2" y="116.0" text-anchor="start">Cluster</text><g class="lp-node a"><circle cx="292.2" cy="249.0" r="20"/><text x="292.2" y="249.0">3</text></g><text class="lp-lab" x="318.2" y="274.0" text-anchor="start">Decide</text><g class="lp-node l"><circle cx="190.0" cy="308.0" r="20"/><text x="190.0" y="308.0">4</text></g><text class="lp-lab" x="190.0" y="353.0" text-anchor="middle">Apply</text><g class="lp-node l"><circle cx="87.8" cy="249.0" r="20"/><text x="87.8" y="249.0">5</text></g><text class="lp-lab" x="61.8" y="274.0" text-anchor="end">Verify</text><g class="lp-node l"><circle cx="87.8" cy="131.0" r="20"/><text x="87.8" y="131.0">6</text></g><text class="lp-lab" x="61.8" y="116.0" text-anchor="end">Retire</text><text class="lp-c1" x="190" y="186">Feedback</text><text class="lp-c2" x="190" y="206">→ shared context</text></svg>
+      <div class="sec-head" style="margin:0"><div class="eyebrow">Framework</div><h2>One loop from feedback to context</h2><p class="muted">Understand captures and clusters. Act decides. Learn applies, verifies and retires. Most data products stop at Apply.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="d-explorations">
+    <div class="sec-head"><div class="eyebrow">Explorations</div><h2>Eight sketches, one per pattern</h2></div>
+    <div class="xgrid">
+      <div class="xcard sp-u"><span class="xn">U1 · builds on Confluence, Figma</span><h4>Digest with counts and owners</h4><div class="sketch" aria-label="Illustrative sketch of a digest above a comment panel">
+        <div class="sk-bar"><span>Comments · 23 open</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="ai-box">
+            <div class="row"><span class="lab">Summary of 23 unresolved</span><span class="pill">updated 4m ago ↻</span></div>
+            <div><b>Scope (6)</b> · Two reviewers question whether export belongs in v1 <span class="pill">3 people</span></div>
+            <div><b>Copy (9)</b> · Empty-state wording flagged on 4 frames <span class="pill">5 people</span></div>
+            <div><b>Blocked (2)</b> · Waiting on legal for consent text <span class="pill w">needs owner</span></div>
+            <div class="btnrow"><span class="sbtn">Jump to sources</span><span class="sbtn">By person</span><span class="sbtn ai">Draft replies</span></div>
+          </div>
+          <div class="cmt"><div class="av">MR</div><div class="t"><div class="n">Maya R. · Frame 4</div>Should export be in v1 at all?</div></div>
+          <div class="cmt"><div class="av">JT</div><div class="t"><div class="n">Jon T. · Frame 7</div>"Nothing here yet" feels cold.</div></div>
+        </div>
+        <div class="sk-cap">My sketch · counts show frequency, links keep it verifiable</div>
+      </div></div>
+      <div class="xcard sp-u"><span class="xn">U2 · builds on Drive, Gemini</span><h4>Scoped question with coverage</h4><div class="sketch" aria-label="Illustrative sketch of a scoped comment query">
+        <div class="sk-bar"><span>Ask about feedback</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="input"><span class="scopechip">Folder: Q3 dashboards</span><span class="scopechip">Unresolved</span><span>What are reviewers disputing?</span></div>
+          <div class="ai-box">
+            <div class="row"><span class="lab">Answer</span><span class="pill">read 14 of 16 files · 2 no access</span></div>
+            <div>Most disputes are about <b>active user</b>: 3 dashboards count test accounts, 2 don't.</div>
+            <div class="btnrow"><span class="sbtn">Show 11 comments</span><span class="sbtn ai">Propose a definition</span></div>
+          </div>
+        </div>
+        <div class="sk-cap">My sketch · scope chips and a coverage count make the answer checkable</div>
+      </div></div>
+      <div class="xcard sp-a"><span class="xn">A1 · builds on Copilot, Bugbot</span><h4>Hand off and report in the thread</h4><div class="sketch" aria-label="Illustrative sketch of delegating a comment to an agent">
+        <div class="sk-bar"><span>Review thread · line 42</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="cmt"><div class="av">PK</div><div class="t"><div class="n">Priya K.</div>Retry loop needs a backoff cap.</div></div>
+          <div class="btnrow"><span class="sbtn">Reply</span><span class="sbtn">Resolve</span><span class="sbtn ai">Hand to agent</span></div>
+          <div class="ai-box">
+            <div class="lab">Agent · working</div>
+            <div>Added max delay of 30s and a test. Pushed 1 commit.</div>
+            <div class="btnrow"><span class="sbtn">View diff</span><span class="sbtn primary">Accept &amp; resolve</span></div>
+          </div>
+        </div>
+        <div class="sk-cap">My sketch · the agent reports in the thread it was given</div>
+      </div></div>
+      <div class="xcard sp-a"><span class="xn">A2 · builds on GitHub, Frame.io</span><h4>Batch tray that shows its filter</h4><div class="sketch" aria-label="Illustrative sketch of a batch apply tray">
+        <div class="sk-bar"><span>Suggestions · 7</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="row"><span class="scopechip">Filter: copy · unresolved</span><span class="pill">4 selected</span></div>
+          <div class="check"><span class="box on"></span><div>Rename "Submit" to "Save draft" <span class="pill">Ana</span></div></div>
+          <div class="check"><span class="box on"></span><div>Shorten error message <span class="pill">Leo</span></div></div>
+          <div class="check"><span class="box on"></span><div>Sentence case on tabs <span class="pill">Ana</span></div></div>
+          <div class="check"><span class="box"></span><div>Rethink onboarding flow <span class="pill w">too broad</span></div></div>
+          <div class="btnrow"><span class="sbtn">Preview combined change</span><span class="sbtn primary">Apply 4 as one change</span></div>
+        </div>
+        <div class="sk-cap">My sketch · the filter defines the batch; broad items are flagged, not applied</div>
+      </div></div>
+      <div class="xcard sp-a"><span class="xn">A3 · builds on Linear</span><h4>Dashed chips for AI suggestions</h4><div class="sketch" aria-label="Illustrative sketch of a triage inbox with AI suggestions">
+        <div class="sk-bar"><span>Feedback inbox · 38</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="check" style="flex-direction:column;gap:6px">
+            <div><b>"Revenue tile doesn't match finance"</b> · from Slack</div>
+            <div class="btnrow"><span class="human">Data Platform</span><span class="sug">+ label: metric-definition</span><span class="sug">+ owner: Lena</span><span class="sug">possible duplicate of #212</span></div>
+            <div class="muted" style="font-size:.74rem">Why: 3 similar reports this month mention the same tile.</div>
+          </div>
+          <div class="btnrow"><span class="sbtn">Accept all</span><span class="sbtn">Mark duplicate</span><span class="sbtn">Decline</span></div>
+        </div>
+        <div class="sk-cap">My sketch · solid = set by a person, dashed = AI suggestion</div>
+      </div></div>
+      <div class="xcard sp-l"><span class="xn">L1 · builds on CodeRabbit, Bugbot</span><h4>Rule with scope and track record</h4><div class="sketch" aria-label="Illustrative sketch of promoting a comment into a rule">
+        <div class="sk-bar"><span>Candidate rule</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="ai-box">
+            <div class="lab">Learned from 6 comments · 3 reviewers</div>
+            <div><b>Prefer early returns over nested try/catch in API handlers.</b></div>
+            <div class="row"><span class="scope-pick"><span>This repo</span><span class="on">All API repos</span><span>Org</span></span><span class="pill ok">helped 9 of 11 times</span></div>
+          </div>
+          <div class="cmt"><div class="av">DS</div><div class="t"><div class="n">Dev S. · PR #812</div>We do early returns here, not try/catch.</div></div>
+          <div class="btnrow"><span class="sbtn">See evidence</span><span class="sbtn">Edit wording</span><span class="sbtn primary">Promote</span><span class="sbtn">Dismiss</span></div>
+        </div>
+        <div class="sk-cap">My sketch · evidence, scope and track record next to the decision</div>
+      </div></div>
+      <div class="xcard sp-l"><span class="xn">L2 · builds on Hex, Genie</span><h4>Problem-first suggestion feed</h4><div class="sketch" aria-label="Illustrative sketch of a review-agent suggestion feed">
+        <div class="sk-bar"><span>Context suggestions · 5 new</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="ai-box">
+            <div class="row"><span class="lab">Problem · seen in 14 threads</span><span class="pill w">high impact</span></div>
+            <div>"Churn" is computed three ways; answers disagree for the same quarter.</div>
+            <div class="diff"><div class="minus">- churn: not defined</div><div class="plus">+ churn = accounts lost ÷ accounts at period start; exclude trials</div></div>
+            <div class="btnrow"><span class="sbtn">Open 14 threads</span><span class="sbtn">Test on 20 past questions</span><span class="sbtn primary">Apply</span></div>
+          </div>
+          <div class="row"><span>Missing join: orders ↔ refunds</span><span class="pill">6 threads</span></div>
+          <div class="row"><span>Fiscal year starts Feb 1</span><span class="pill">4 threads</span></div>
+        </div>
+        <div class="sk-cap">My sketch · problem, evidence, proposed diff, a test before apply</div>
+      </div></div>
+      <div class="xcard sp-l"><span class="xn">L3 · builds on LangSmith, MLflow</span><h4>Rubric that keeps the reason</h4><div class="sketch" aria-label="Illustrative sketch of a rubric review queue">
+        <div class="sk-bar"><span>Review queue · Finance agent</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="sk-body">
+          <div class="split">
+            <div class="qlist">
+              <div class="cur"><span>#41</span><span class="pill w">review</span></div>
+              <div><span>#42</span><span class="pill w">review</span></div>
+              <div><span>#39</span><span class="pill">2nd review</span></div>
+              <div><span>#38</span><span class="pill ok">done</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+              <div><b>Q:</b> Q3 gross margin by region?</div>
+              <div class="row"><span>Correct metric</span><span class="btnrow"><span class="sbtn">Yes</span><span class="sbtn primary">No</span></span></div>
+              <div class="row"><span>Right filters</span><span class="btnrow"><span class="sbtn primary">Yes</span><span class="sbtn">No</span></span></div>
+              <div class="input" style="font-size:.74rem">Comment: used net revenue, not gross</div>
+              <div class="btnrow"><span class="sbtn">Add to eval set</span><span class="sbtn primary">Submit · next</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="sk-cap">My sketch · a rubric makes judgments countable; free text still allowed</div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="d-opportunities">
+    <div class="sec-head"><div class="eyebrow">Opportunities</div><h2>Where products fall short</h2></div>
+    <div class="opps">
+      <div class="opp sp-l"><span class="tg"><i></i>Learn</span><h4>Human data comments skip the loop <span class="flag">largest</span></h4><p><b>Try:</b> feed dashboard and notebook comments to the review agent.</p></div>
+      <div class="opp sp-u"><span class="tg"><i></i>Understand</span><h4>Same dispute, 12 dashboards</h4><p><b>Try:</b> cluster comments by metric or column, via lineage.</p></div>
+      <div class="opp sp-u"><span class="tg"><i></i>Understand</span><h4>No frequency, no coverage</h4><p><b>Try:</b> counts per theme; "read 14 of 16".</p></div>
+      <div class="opp sp-a"><span class="tg"><i></i>Act</span><h4>Batching stops at one artifact</h4><p><b>Try:</b> act on a theme across a folder.</p></div>
+      <div class="opp sp-a"><span class="tg"><i></i>Act</span><h4>Thumbs carry no reason</h4><p><b>Try:</b> one structured follow-up on disagreement.</p></div>
+      <div class="opp sp-l"><span class="tg"><i></i>Learn</span><h4>Unclear authority and blast radius</h4><p><b>Try:</b> owner per scope; preview affected answers.</p></div>
+      <div class="opp sp-l"><span class="tg"><i></i>Learn</span><h4>Context never expires</h4><p><b>Try:</b> hit rates and auto-retire; a per-dashboard scope.</p></div>
+    </div>
+  </section>
+  <div class="pager"><a href="#data-lens">← Competitive landscape</a><a class="next" href="#questions">4 · Open questions →</a></div>
+</div>
+
+<!-- ============ 4 QUESTIONS ============ -->
+<div class="panel" id="questions">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">4 · Open questions</div><h2>Decisions ahead</h2></div>
+    <div class="qs">
+      <div class="qn"><span class="k">Strategy</span><h4>Which pillar is our product's job, and in what order?</h4><p>Understand is table stakes; Act and Learn still differentiate.</p></div>
+      <div class="qn"><span class="k">Users</span><h4>Whose comments: human, human-to-agent, or agent?</h4><p>The largest gap is human comments feeding Learn.</p></div>
+      <div class="qn"><span class="k">Learn</span><h4>Who can promote a comment to a workspace rule?</h4><p>Without an owner per scope, rules conflict.</p></div>
+      <div class="qn"><span class="k">Act</span><h4>What is the unit of a batch?</h4><p>For data, "this metric" may beat "this folder".</p></div>
+      <div class="qn"><span class="k">Success</span><h4>What proves it worked?</h4><p>Repeat comments, benchmark accuracy, analyst escalations.</p></div>
+      <div class="qn"><span class="k">Trust</span><h4>What must never be automated?</h4><p>Data tools keep a human approval step; Bugbot auto-promotes.</p></div>
+    </div>
+  </section>
+  <section class="sec">
+    <div class="sec-head"><div class="eyebrow">Research gaps</div><h3>Not yet verified</h3></div>
+    <ul class="unk">
+      <li>Screenshots of Snowflake suggestions and Notion comment triggers.</li>
+      <li>Whether Gemini's comment features span a folder or one doc only.</li>
+      <li>Adoption data for comment summaries. None published.</li>
+      <li>Power BI and Dovetail feedback screens.</li>
+      <li>Permission handling when summaries span partly restricted files.</li>
+    </ul>
+  </section>
+  <div class="pager"><a href="#design">← Principles &amp; explorations</a><a class="next" href="#sources">5 · Sources →</a></div>
+</div>
+
+<!-- ============ 5 SOURCES ============ -->
+<div class="panel" id="sources">
+  <section class="sec" style="padding-top:8px">
+    <div class="sec-head"><div class="eyebrow">5 · Sources</div><h2>Sources</h2></div>
+    <div class="sources">
+      <h4>Problem evidence</h4>
+      <ul>
+        <li><a href="https://www.faros.ai/blog/ai-software-engineering">Faros AI · AI Productivity Paradox Report 2025</a></li>
+        <li><a href="https://www.faros.ai/blog/ai-code-quality-senior-engineer-review-burden">Faros AI · AI Engineering Report 2026</a></li>
+        <li><a href="https://forum.figma.com/suggest-a-feature-11/summary-of-comments-in-a-file-36409">Figma forum · Summary of comments (2024)</a></li>
+        <li><a href="https://forum.figma.com/suggest-a-feature-11/summarise-all-comments-into-next-steps-with-figma-ai-36882">Figma forum · Comments into next steps (2025)</a></li>
+        <li><a href="https://forum.figma.com/share-your-feedback-26/summarize-ai-beta-feature-doesn-t-take-into-account-frequency-of-mentions-36939">Figma forum · Summarize ignores frequency</a></li>
+        <li><a href="https://community.vercel.com/t/sync-vercel-preview-deployment-comments-to-github-pr-for-ai-agent-feedback-loops/31663">Vercel community · Preview comments for agents</a></li>
+        <li><a href="https://windowsnews.ai/article/google-docs-just-let-gemini-read-your-comments-for-youheres-how-to-opt-out.440890">Windows News · Gemini comment privacy</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/answers/questions/5723312/turn-off-copilot-summary-in-word-documents">Microsoft Q&amp;A · Turn off Copilot summary</a></li>
+      </ul>
+      <h4>Understand</h4>
+      <ul>
+        <li><a href="https://workspaceupdates.googleblog.com/2026/07/streamline-collaboration-in-google-docs-with-Gemini-powered-comment-workflows.html">Google · Gemini comment workflows in Docs</a></li>
+        <li><a href="https://www.androidauthority.com/gemini-google-docs-comments-3692242/">Android Authority · Gemini comments (screenshots)</a></li>
+        <li><a href="https://workspaceupdates.googleblog.com/2025/06/catch-me-up-in-google-drive.html">Google · Catch me up in Drive</a></li>
+        <li><a href="https://support.atlassian.com/confluence-cloud/docs/summarize-comments-using-atlassian-intelligence/">Atlassian · Summarize comments using Rovo</a></li>
+        <li><a href="https://support.atlassian.com/confluence-cloud/docs/comment-on-pages-and-blog-posts/">Atlassian · Comments panel</a></li>
+        <li><a href="https://office-watch.com/2025/copilot-word-365-document-summary-gets-better-for-some/">Office Watch · Word Copilot summary tabs</a></li>
+        <li><a href="https://www.figma.com/solutions/ai-comment-summarizer/">Figma · AI comment summarizer</a></li>
+        <li><a href="https://help.figma.com/hc/en-us/articles/18711926790423-Sort-and-summarize-stickies-with-FigJam-AI">Figma Help · Sort and summarize stickies</a></li>
+        <li><a href="https://www.productboard.com/blog/productboard-spark-ai-customer-feedback-analysis/">Productboard · Spark feedback analysis</a></li>
+        <li><a href="https://help.tableau.com/current/pro/desktop/en-us/comment.htm">Tableau Help · Comment on views</a></li>
+      </ul>
+      <h4>Act</h4>
+      <ul>
+        <li><a href="https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/incorporating-feedback-in-your-pull-request">GitHub · Batch suggestions</a></li>
+        <li><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-code-review">GitHub · Copilot code review</a></li>
+        <li><a href="https://techcommunity.microsoft.com/blog/microsoft365copilotblog/copilot-in-word-new-capabilities-for-document-workflows/4508974">Microsoft · Copilot in Word comment workflows</a></li>
+        <li><a href="https://github.blog/changelog/2026-07-17-github-mobile-fix-pull-request-comments-with-copilot-cloud-agent/">GitHub changelog · Fix with Copilot on mobile</a></li>
+        <li><a href="https://zenn.dev/yuma_prog/articles/ghcp-reviewfix-by-agent?locale=en">Zenn · Copilot agent fixing review comments</a></li>
+        <li><a href="https://cursor.com/docs/bugbot">Cursor · Bugbot docs</a></li>
+        <li><a href="https://vercel.com/changelog/manage-vercel-toolbar-comments-from-the-cli">Vercel · Comments from the CLI</a></li>
+        <li><a href="https://help.frame.io/en/articles/9105278-comments-panel-overview">Frame.io · Comments panel</a></li>
+        <li><a href="https://linear.app/now/how-we-built-triage-intelligence">Linear · How we built Triage Intelligence</a></li>
+        <li><a href="https://linear.app/now/cx-in-linear">Linear · CX team workflow</a></li>
+        <li><a href="https://linear.app/docs/triage">Linear · Triage docs</a></li>
+        <li><a href="https://www.notion.com/help/custom-agents">Notion · Custom Agents</a></li>
+      </ul>
+      <h4>Learn</h4>
+      <ul>
+        <li><a href="https://docs.coderabbit.ai/knowledge-base/learnings">CodeRabbit · Learnings</a></li>
+        <li><a href="https://www.coderabbit.ai/blog/context-behind-code-review-comments">CodeRabbit · Context behind review comments</a></li>
+        <li><a href="https://cursor.com/blog/bugbot-learning">Cursor · Bugbot learned rules</a></li>
+        <li><a href="https://cursor.com/changelog/04-08-26">Cursor · Changelog Apr 8, 2026</a></li>
+        <li><a href="https://hex.tech/blog/introducing-context-suggestions/">Hex · Context Suggestions</a></li>
+        <li><a href="https://hex.tech/blog/introducing-context-studio/">Hex · Introducing Context Studio</a></li>
+        <li><a href="https://learn.hex.tech/docs/agent-management/observability">Hex · Agent observability docs</a></li>
+        <li><a href="https://docs.databricks.com/aws/en/genie-agents/monitor">Databricks · Test and monitor Genie</a></li>
+        <li><a href="https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-analyst/verified-query-suggestions">Snowflake · Verified query suggestions</a></li>
+        <li><a href="https://docs.thoughtspot.com/cloud/26.10.0.cl/spotter-coaching-steps">ThoughtSpot · Steps to coach Spotter</a></li>
+        <li><a href="https://docs.langchain.com/langsmith/annotation-queues">LangSmith · Annotation queues</a></li>
+        <li><a href="https://docs.databricks.com/aws/en/mlflow3/genai/human-feedback/concepts/labeling-sessions">MLflow · Labeling sessions</a></li>
+      </ul>
+      <h4>Data &amp; analytics</h4>
+      <ul>
+        <li><a href="https://docs.cloud.google.com/looker/docs/conversational-analytics-looker-rollout">Google · Looker CA rollout strategy</a></li>
+        <li><a href="https://cloud.google.com/blog/products/data-analytics/conversational-analytics-in-google-data-cloud-in-q326">Google Cloud · Conversational Analytics Q3 2026</a></li>
+        <li><a href="https://www.salesforce.com/news/stories/tableau-agentic-analytics-platform-announcement/">Salesforce · Tableau agentic analytics</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/power-bi/explore-reports/copilot-pane-summarize-content">Microsoft · Power BI Copilot summaries</a></li>
+        <li><a href="https://www.snowflake.com/en/developers/guides/best-practices-semantic-views-cortex-analyst/">Snowflake · Semantic view best practices</a></li>
+        <li><a href="https://austinhenley.com/pubs/Chattopadhyay2020CHI_NotebookPainpoints.pdf">CHI 2020 · What's wrong with computational notebooks?</a></li>
+      </ul>
+    </div>
+    <p class="credit">Screenshots belong to their companies and come from public docs, blogs, changelogs, launch videos, or press where noted. Sketches are mine and illustrative.</p>
+  </section>
+  <div class="pager"><a href="#questions">← Open questions</a><a class="next" href="#overview">Back to Overview ↺</a></div>
+</div>
+
+<footer>Research compiled October 2026. Product capabilities change quickly; check the source before citing a detail.</footer>
+</div>
+
+<dialog id="lightbox" aria-label="Screenshot"><form method="dialog"><button class="lb-close" aria-label="Close">Close ✕</button></form><img id="lb-img" alt=""><div class="lb-meta"><b id="lb-t"></b><span id="lb-c"></span><span class="d" id="lb-d"></span><a class="src" id="lb-s" href="#"></a></div></dialog>
+
+<script>
+(function(){
+  var panels=[].slice.call(document.querySelectorAll('.panel'));
+  var subs=[].slice.call(document.querySelectorAll('.subpanel'));
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var segs=[].slice.call(document.querySelectorAll('.seg a'));
+  function setActive(pid,sid){
+    panels.forEach(function(p){p.classList.toggle('active',p.id===pid);});
+    if(pid==='competitive'){ sid=sid||'understand';
+      subs.forEach(function(s){s.classList.toggle('active',s.id===sid);});
+      segs.forEach(function(s){ if(s.dataset.sub===sid) s.setAttribute('aria-current','page'); else s.removeAttribute('aria-current');});
+    }
+    tabs.forEach(function(t){ if(t.dataset.tab===pid) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current');});
+  }
+  function route(){
+    var h=(location.hash||'').slice(1), el=h&&document.getElementById(h);
+    if(!el){setActive('overview');window.scrollTo(0,0);return;}
+    var p=el.classList.contains('panel')?el:el.closest('.panel');
+    var s=el.classList.contains('subpanel')?el:el.closest('.subpanel');
+    setActive(p?p.id:'overview',s?s.id:null);
+    if(el===p){window.scrollTo(0,0);}
+    else if(el===s){var seg=document.querySelector('.seg'); requestAnimationFrame(function(){seg.scrollIntoView({block:'start'});});}
+    else requestAnimationFrame(function(){el.scrollIntoView({block:'start'});});
+  }
+  window.addEventListener('hashchange',route); route();
+  var dlg=document.getElementById('lightbox'),img=document.getElementById('lb-img');
+  document.querySelectorAll('.shot-img').forEach(function(b){
+    b.addEventListener('click',function(){
+      img.src=b.dataset.full; img.alt=b.dataset.cap;
+      document.getElementById('lb-t').textContent=b.dataset.prod;
+      document.getElementById('lb-c').textContent=b.dataset.cap;
+      document.getElementById('lb-d').textContent=b.dataset.detail;
+      var s=document.getElementById('lb-s'); s.href=b.dataset.src; s.textContent=b.dataset.stype;
+      if(dlg.showModal) dlg.showModal();
+    });
+  });
+  dlg.addEventListener('click',function(e){ if(e.target===dlg||e.target===img) dlg.close(); });
+})();
+</script>
