@@ -1,5 +1,9 @@
 # ux-competitive-research
 
+**Ask "how are other products solving X?" and get back a research report you can share with your team.**
+
+[**See a live example →**](https://ashlithos.github.io/ux-competitive-research/examples/comments-at-scale/) · [Install](#install) · [How it works](#how-it-works)
+
 An agent skill that turns a UX question ("how are other products solving X?")
 into a sourced competitive research report: one HTML page with **real product
 screenshots**, **charts**, **CUJs**, **design principles**, **sketches** and
@@ -32,19 +36,25 @@ Confluence, Word, Figma, GitHub Copilot, Cursor Bugbot, CodeRabbit, Linear, Hex,
 Databricks Genie, Snowflake, ThoughtSpot, LangSmith, MLflow, and more), with
 49 screenshots and a data-analytics lens.
 
-Open `examples/comments-at-scale/index.html` in a browser. With GitHub Pages
-enabled on `main`, it's at
-`https://ashlithos.github.io/ux-competitive-research/examples/comments-at-scale/`.
+**[Open the live report](https://ashlithos.github.io/ux-competitive-research/examples/comments-at-scale/)**, or open
+`examples/comments-at-scale/index.html` locally in a browser.
 
 ## Install
 
-Claude Code (personal skills):
+Claude Code, from the [UX-skills](https://github.com/ashlithos/UX-skills) marketplace (gets updates):
+
+```
+/plugin marketplace add ashlithos/UX-skills
+/plugin install ux-competitive-research@ux-skills
+```
+
+Or as a personal skill:
 
 ```bash
 git clone https://github.com/ashlithos/ux-competitive-research ~/.claude/skills/ux-competitive-research
 ```
 
-Or with the skills CLI:
+Codex, Cursor and other agents, with the skills CLI:
 
 ```bash
 npx skills add ashlithos/ux-competitive-research
